@@ -38,4 +38,4 @@ def bin(fn):
 	return app.send_static_file(fn + '.bin')
 
 if __name__=='__main__':
-	app.run(host='')
+	app.run(host='', port=23109)
