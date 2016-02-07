@@ -1,14 +1,18 @@
 class Cpu
-	constructor: (bios) ->
+	constructor: (@bios) ->
+		@reset()
+
+	reset: ->
 		@inscount = 0 # Number of instructions executed
-		@mem = new Memory @, bios
+		@mem = new Memory @, @bios
 		@regs = [
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0
 		]
-		@hi = @lo = @pc = @asid = 0
+		@hi = @lo = 0
+		@pc = 0xbfc00000
 		@delay = null # Delay slot for execution
 
 		@cop0reg = [
@@ -18,29 +22,25 @@ class Cpu
 			0, 0, 0, 0, 0, 0, 0, 0
 		]
 
-	execute_one: (pc) ->
+	execute_one: ->
 		@inscount++
-		interpret pc, @mem.uint32(pc), @
+		delayed = @delay != null
+		cpc = if delayed then @delay else @pc
+		@delay = null
+		try
+			if interpret(cpc, @mem.uint32(cpc), @) == false
+				inst = @mem.uint32 cpc
+				phex32 cpc, inst, disassemble(cpc, inst)
+				throw 'Unknown instruction'
+		catch e
+			return e
+		
+		@pc += 4 if not delayed
+		null
 
 	branch: (pc) ->
 		@delay = @pc + 4
 		@pc = pc - 4 # Compensate for PC push
-
-	run: (count=1000000) ->
-		for i in [0...count]
-			delayed = @delay != null
-			cpc = if delayed then @delay else @pc
-			@delay = null
-			try
-				if @execute_one(cpc) == false
-					inst = @mem.uint32 cpc
-					phex32 cpc, inst, disassemble(cpc, inst)
-					throw 'Unknown instruction'
-			catch e
-				return e
-			
-			@pc += 4 if not delayed
-		true
 
 	copreg: (cop, reg, val=null) ->
 		if cop == 0

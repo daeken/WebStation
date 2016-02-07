@@ -6,10 +6,57 @@
 		<script src="interp.js"></script>
 		<script src="disasm.js"></script>
 		<script src="memory.coffee"></script>
+		<script src="debugger.coffee"></script>
 		<script src="cpu.coffee"></script>
 		<script src="main.coffee"></script>
+		<link rel="stylesheet" type="text/css" href="style.css">
 		<title>WebStation</title>
 	</head>
 	<body>
+		<div class="left-column">
+			<button id="reset">Reset</button>
+			<button id="go-stop">Go</button>
+			<button id="step">Step</button><br>
+			<br>
+			<table id="breakpoints">
+				<tr><th>Address</th><th>Type</th></tr>
+			</table>
+			<br>
+			<h4>New Breakpoint</h4>
+			Address: <input type="text" id="new-bp-addr"><br>
+			Type: <select id="new-bp-type">
+				<option value="0">Execute</option>
+			</select><br>
+			<button id="new-bp">Add</button>
+		</div>
+		<div class="middle-column">
+			<pre id="disassembly">
+			</div>
+		</div>
+		<div class="right-column">
+			<table class="registers">
+				<tr><td class="bold">zero (r0)</td><td class="value" id="r0"></td><td class="bold">at (r1)</td><td class="value" id="r1"></td></tr>
+				<tr><td class="bold">v0 (r2)</td><td class="value" id="r2"></td><td class="bold">v1 (r3)</td><td class="value" id="r3"></td></tr>
+				<tr><td class="bold">a0 (r4)</td><td class="value" id="r4"></td><td class="bold">a1 (r5)</td><td class="value" id="r5"></td></tr>
+				<tr><td class="bold">a2 (r6)</td><td class="value" id="r6"></td><td class="bold">a3 (r7)</td><td class="value" id="r7"></td></tr>
+ 
+				<tr><td class="bold">t0 (r8)</td><td class="value" id="r8"></td><td class="bold">t1 (r9)</td><td class="value" id="r9"></td></tr>
+				<tr><td class="bold">t2 (r10)</td><td class="value" id="r10"></td><td class="bold">t3 (r11)</td><td class="value" id="r11"></td></tr>
+				<tr><td class="bold">t4 (r12)</td><td class="value" id="r12"></td><td class="bold">t5 (r13)</td><td class="value" id="r13"></td></tr>
+				<tr><td class="bold">t6 (r14)</td><td class="value" id="r14"></td><td class="bold">t7 (r15)</td><td class="value" id="r15"></td></tr>
+ 
+				<tr><td class="bold">s0 (r16)</td><td class="value" id="r16"></td><td class="bold">s1 (r17)</td><td class="value" id="r17"></td></tr>
+				<tr><td class="bold">s2 (r18)</td><td class="value" id="r18"></td><td class="bold">s3 (r19)</td><td class="value" id="r19"></td></tr>
+				<tr><td class="bold">s4 (r20)</td><td class="value" id="r20"></td><td class="bold">s5 (r21)</td><td class="value" id="r21"></td></tr>
+				<tr><td class="bold">s6 (r22)</td><td class="value" id="r22"></td><td class="bold">s7 (r23)</td><td class="value" id="r23"></td></tr>
+ 
+				<tr><td class="bold">t8 (r24)</td><td class="value" id="r24"></td><td class="bold">t9 (r25)</td><td class="value" id="r25"></td></tr>
+				<tr><td class="bold">k0 (r26)</td><td class="value" id="r26"></td><td class="bold">k1 (r27)</td><td class="value" id="r27"></td></tr>
+				<tr><td class="bold">gp (r28)</td><td class="value" id="r28"></td><td class="bold">sp (r29)</td><td class="value" id="r29"></td></tr>
+				<tr><td class="bold">fp (r30)</td><td class="value" id="r30"></td><td class="bold">ra (r31)</td><td class="value" id="r31"></td></tr>
+				<tr><td class="bold">hi</td><td class="value" id="hi"></td><td class="bold">lo</td><td class="value" id="lo"></td></tr>
+				<tr><td class="bold">pc</td><td class="value" id="pc"></td></tr>
+			</table>
+		</div>
 	</body>
 </html>

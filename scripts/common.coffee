@@ -1,5 +1,11 @@
 String.prototype.zeropad = (n) -> ('0000000000000000' + @).slice -n
-hexify = (n) -> n.toString(16)
+hexify = (n, pad=null) ->
+	if n < 0 and pad != null
+		'-' + ((-n).toString(16).zeropad(pad))
+	else if pad == null
+		n.toString(16)
+	else
+		n.toString(16).zeropad(pad)
 phex = (ns...) -> console.log (hexify n for n in ns)...
 phex32 = (ns...) ->
 	console.log ((if typeof n == 'number' then hexify(n).zeropad(8) else n) for n in ns)...

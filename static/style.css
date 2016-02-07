@@ -1,0 +1,36 @@
+.left-column {
+	float: left;
+	width: 33%;
+	height: 100%;
+	overflow: auto;
+}
+
+.middle-column {
+	float: left;
+	width: 34%;
+	height: 100%;
+	overflow: auto;
+}
+
+.right-column {
+	float: left;
+	width: 33%;
+	height: 100%;
+	overflow: auto;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.value {
+	font-family: monospace;
+}
+
+#disassembly {
+	font-family: monospace;
+}
+
+table, td, th {
+	border: 1px solid gray;
+}

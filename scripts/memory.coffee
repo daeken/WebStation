@@ -47,7 +47,7 @@ class HWBuffer
 	uint8: (offset, val=null) ->
 		switch offset
 			when 0x1f802041
-				phex32 'Trace ' + val, @cpu.pc
+				phex32 'Trace ' + val, @cpu.pc, 'from', @cpu.regs[REG_RA]
 			else
 				boff = (offset & 3) >>> 0
 				coff = (offset & 0xFFFFFFFC) >>> 0

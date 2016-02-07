@@ -11,6 +11,10 @@ app.debug = True
 def root():
 	return app.send_static_file('index.html')
 
+@app.route('/<fn>.css')
+def css(fn):
+	return app.send_static_file(fn + '.css')
+
 @app.route('/<fn>.js')
 def js(fn):
 	if fn in ('interp', 'disasm'):
