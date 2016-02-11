@@ -133,7 +133,7 @@ def ADDIU : IType<0b001001, "addiu %$rt, %$rs, $eimm",
 		(set (gpr $rt), (add (gpr $rs), $eimm)))
 >;
 
-def ADDU : RType<0b100001, "addu %$rd, %$rs, $rt", 
+def ADDU : RType<0b100001, "addu %$rd, %$rs, %$rt", 
 	(set (gpr $rd), (add (gpr $rs), (gpr $rt)))
 >;
 
@@ -148,13 +148,13 @@ def ANDI : IType<0b001100, "andi %$rt, %$rs, $eimm",
 
 def BEQ : IType<0b000100, "beq %$rs, %$rt, $target", 
 	(let $target, (add (pcd), (signext 18, (shl $imm, 2))), 
-		(when (eq (gpr $rs), (gpr $rt)), 
+		(when (eq (unsigned (gpr $rs)), (unsigned (gpr $rt))), 
 			(branch $target)))
 >;
 
 def BGEZ : RIType<0b000001, 0b00001, "bgez %$rs, $target", 
 	(let $target, (add (pcd), (signext 18, (shl $imm, 2))), 
-		(when (ge (gpr $rs), 0), 
+		(when (ge (signed (gpr $rs)), 0), 
 			(branch $target)))
 >;
 
@@ -162,27 +162,27 @@ def BGEZAL : RIType<0b000001, 0b10001, "bgezal %$rs, $target",
 	(block
 		(set (gpr 31), (pcd)), 
 		(let $target, (add (pcd), (signext 18, (shl $imm, 2))), 
-			(when (ge (gpr $rs), 0), 
+			(when (ge (signed (gpr $rs)), 0), 
 				(branch $target))))
 >;
 
 // This isn't really RIType, but that lets us constrain rt
 def BGTZ : RIType<0b000111, 0b00000, "bgtz %$rs, $target", 
 	(let $target, (add (pcd), (signext 18, (shl $imm, 2))), 
-		(when (gt (gpr $rs), 0), 
+		(when (gt (signed (gpr $rs)), 0), 
 			(branch $target)))
 >;
 
 // This isn't really RIType, but that lets us constrain rt
 def BLEZ : RIType<0b000110, 0b00000, "blez %$rs, $target", 
 	(let $target, (add (pcd), (signext 18, (shl $imm, 2))), 
-		(when (le (gpr $rs), 0), 
+		(when (le (signed (gpr $rs)), 0), 
 			(branch $target)))
 >;
 
 def BLTZ : RIType<0b000001, 0b00000, "bltz %$rs, $target", 
 	(let $target, (add (pcd), (signext 18, (shl $imm, 2))), 
-		(when (lt (gpr $rs), 0), 
+		(when (lt (signed (gpr $rs)), 0), 
 			(branch $target)))
 >;
 
@@ -190,7 +190,7 @@ def BLTZAL : RIType<0b000001, 0b10000, "bltzal %$rs, $target",
 	(block
 		(set (gpr 31), (pcd)), 
 		(let $target, (add (pcd), (signext 18, (shl $imm, 2))), 
-			(when (lt (gpr $rs), 0), 
+			(when (lt (signed (gpr $rs)), 0), 
 				(branch $target))))
 >;
 
@@ -204,7 +204,7 @@ def BREAK : SType<0b001101, "break $code",
 	(break $code)
 >;
 
-defm CFCz : CFDef<0b010000, 0b00010, "CFC$cop %$rt, $rd", 
+defm CFCz : CFDef<0b010000, 0b00010, "cfc$cop %$rt, $rd", 
 	(set (gpr $rt), (copcreg $cop, $rd))
 >;
 
@@ -228,11 +228,11 @@ multiclass COPzType<string disasm, dag eval> {
 	defm : CFDef<0b010000, 0b11110, disasm, eval>;
 	defm : CFDef<0b010000, 0b11111, disasm, eval>;
 }
-defm COPz : COPzType<"COP$cop $cofun", 
+defm COPz : COPzType<"cop$cop $cofun", 
 	(copfun $cop, $cofun)
 >;
 
-defm CTCz : CFDef<0b010000, 0b00110, "CTC$cop %$rt, $rd", 
+defm CTCz : CFDef<0b010000, 0b00110, "ctc$cop %$rt, $rd", 
 	(set (copcreg $cop, $rd), (gpr $rt))
 >;
 
@@ -242,7 +242,7 @@ def DIV : RType<0b011010, "div %$rs, %$rt",
 		(set (hi), (mod (gpr $rs), (gpr $rt))))
 >;
 
-def DIVU : RType<0b011001, "divu %$rs, %$rt", 
+def DIVU : RType<0b011011, "divu %$rs, %$rt", 
 	(block
 		(set (lo), (div (unsigned (gpr $rs)), (unsigned (gpr $rt)))), 
 		(set (hi), (mod (unsigned (gpr $rs)), (unsigned (gpr $rt)))))
@@ -303,7 +303,7 @@ def LW : IType<0b100011, "lw %$rt, $offset(%$rs)",
 // XXX: LWCz instruction
 // XXX: LWL instruction
 // XXX: LWR instruction
-defm MFCz : CFDef<0b010000, 0b00000, "MFC$cop %$rt, $rd", 
+defm MFCz : CFDef<0b010000, 0b00000, "mfc$cop %$rt, $rd", 
 	(set (gpr $rt), (copreg $cop, $rd))
 >;
 
@@ -315,7 +315,7 @@ def MFLO : RType<0b010010, "mflo %$rd",
 	(set (gpr $rd), (lo))
 >;
 
-defm MTCz : CFDef<0b010000, 0b00100, "MTC$cop %$rt, $rd", 
+defm MTCz : CFDef<0b010000, 0b00100, "mtc$cop %$rt, $rd", 
 	(set (copreg $cop, $rd), (gpr $rt))
 >;
 
@@ -366,28 +366,28 @@ def SLL : RType<0b000000, "sll %$rd, %$rt, $shamt",
 	(set (gpr $rd), (shl (gpr $rt), $shamt))
 >;
 
-def SLLV : RType<0b000100, "sllv %$rd, %$rt, $rs", 
+def SLLV : RType<0b000100, "sllv %$rd, %$rt, %$rs", 
 	(set (gpr $rd), (shl (gpr $rt), (gpr $rs)))
 >;
 
-def SLT : RType<0b101010, "slt %$rd, %$rs, $rt", 
-	(if (lt (gpr $rs), (gpr $rt)),
+def SLT : RType<0b101010, "slt %$rd, %$rs, %$rt", 
+	(if (lt (signed (gpr $rs)), (signed (gpr $rt))),
 		(set (gpr $rd), 1), 
 		(set (gpr $rd), 0))
 >;
 
 def SLTI : IType<0b001010, "slti %$rt, %$rs, $eimm", 
 	(let $eimm, (signext 16, $imm), 
-		(if (lt (gpr $rs), $eimm),
-			(set (gpr $rd), 1), 
-			(set (gpr $rd), 0)))
+		(if (lt (signed (gpr $rs)), $eimm),
+			(set (gpr $rt), 1), 
+			(set (gpr $rt), 0)))
 >;
 
 def SLTIU : IType<0b001011, "sltiu %$rt, %$rs, $eimm", 
 	(let $eimm, (unsigned (signext 16, $imm)), 
 		(if (lt (unsigned (gpr $rs)), $eimm),
-			(set (gpr $rd), 1), 
-			(set (gpr $rd), 0)))
+			(set (gpr $rt), 1), 
+			(set (gpr $rt), 0)))
 >;
 
 def SLTU : RType<0b101011, "sltu %$rd, %$rs, %$rt", 

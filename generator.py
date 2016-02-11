@@ -59,7 +59,7 @@ def indent(str, single=True):
 def output(expr, top=True):
 	if isinstance(expr, list):
 		return '\n'.join(output(x, top=top) for x in expr)
-	elif isinstance(expr, int):
+	elif isinstance(expr, int) or isinstance(expr, long):
 		return '0x%x' % expr
 	elif isinstance(expr, str) or isinstance(expr, unicode):
 		return expr
@@ -96,8 +96,8 @@ gops = {
 	'nor' : lambda a, b: ('>>>', ('~', ('|', a, b)), 0), 
 	'xor' : lambda a, b: ('>>>', ('^', a, b), 0), 
 	'mul' : lambda a, b: ('*', a, b), # XXX: This needs to be a 64-bit mul!
-	'div' : lambda a, b: ('/', a, b), 
-	'mod' : lambda a, b: ('%', a, b), 
+	'div' : lambda a, b: ('>>>', ('/', a, b), 0), 
+	'mod' : lambda a, b: ('>>>', ('%', a, b), 0), 
 	'shl' : lambda a, b: ('>>>', ('<<', a, b), 0), 
 	'shra' : lambda a, b: ('>>', a, b), 
 	'shrl' : lambda a, b: ('>>>', a, b), 
@@ -154,10 +154,10 @@ def genDisasm((name, type, dasm, dag)):
 	def subgen(dag):
 		if isinstance(dag, str) or isinstance(dag, unicode):
 			return dag
-		elif isinstance(dag, int):
+		elif isinstance(dag, int) or isinstance(dag, long):
 			return dag
 		elif not isinstance(dag, list):
-			print 'Fail', dag
+			print 'Fail', `dag`
 			assert False
 		op = dag[0]
 		if op == 'let':
@@ -249,7 +249,7 @@ def genInterp((name, type, dasm, dag)):
 	def subgen(dag):
 		if isinstance(dag, str) or isinstance(dag, unicode):
 			return dag
-		elif isinstance(dag, int):
+		elif isinstance(dag, int) or isinstance(dag, long):
 			return dag
 		elif not isinstance(dag, list):
 			print 'Fail', dag
@@ -289,8 +289,10 @@ def genInterp((name, type, dasm, dag)):
 			return gops[op](subgen(dag[1]), subgen(dag[2]))
 		elif op in ('signext', 'zeroext'):
 			return (op, dag[1], subgen(dag[2]))
-		elif op in ('pc', 'hi', 'lo'):
-			return [op]
+		elif op == 'pc':
+			return ['pc']
+		elif op in ('hi', 'lo'):
+			return ['state.' + op]
 		elif op == 'pcd':
 			return [('+', 'pc', 4)] # Return the delay slot position
 		elif op == 'gpr':
@@ -303,6 +305,8 @@ def genInterp((name, type, dasm, dag)):
 			return list(map(subgen, dag[1:]))
 		elif op == 'unsigned':
 			return ('>>>', subgen(dag[1]), 0)
+		elif op == 'signed':
+			return ('|', subgen(dag[1]), 0)
 		elif op == 'overflow':
 			return [('overflow', subgen(dag[1]))]
 		elif op == 'raise':
