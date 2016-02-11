@@ -28,18 +28,12 @@ class Cpu
 		@delayed = @delay
 		cpc = if @delayed != null then @delay else @pc
 		@delay = null
-		try
-			if interpret(cpc, @mem.uint32(cpc), @) == false
-				inst = @mem.uint32 cpc
-				phex32 cpc, inst, disassemble(cpc, inst)
-				throw 'Unknown instruction'
-		catch e
-			if e instanceof Exception
-				return null
-			return e
+		if interpret(cpc, @mem.uint32(cpc), @) == false
+			inst = @mem.uint32 cpc
+			phex32 cpc, inst, disassemble(cpc, inst)
+			throw 'Unknown instruction'
 		
 		@pc += 4 if @delayed == null
-		null
 
 	branch: (pc) ->
 		@debugger.branch @pc, pc

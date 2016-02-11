@@ -25,6 +25,7 @@ class MemBuffer
 class HWBuffer
 	constructor: (@cpu) ->
 		@gpu = new GPU @cpu
+		@dma = new DMA @cpu
 
 		@ROM_SIZE = 0x13243F
 		@RAM_SIZE = 0xB88
@@ -41,10 +42,6 @@ class HWBuffer
 		# Interrupt Control
 		@I_STAT = 0
 		@I_MASK = 0
-
-		# DMA
-		@DPCR = 0
-		@DICR = 0
 
 		# Timers
 		@CNT0_VAL = 0
@@ -116,7 +113,7 @@ class HWBuffer
 
 		# Special cases first
 		if 0x1f801c00 <= offset < 0x1f801d80
-			voice = (offset - 0x1f801c00) >> 2
+			voice = (offset - 0x1f801c00) >> 4
 			switch offset & 0xF
 				when 0 # Voice Volume Left/Right
 					0
@@ -126,6 +123,18 @@ class HWBuffer
 					0
 				when 12 # Voice ADSR Current Volume | ADPCM Repeat Address
 					0
+		else if 0x1f801080 <= offset < 0x1f8010f0
+			channel = (offset - 0x1f801080) >> 4
+			switch offset & 0xF
+				when 0 # D_MADR - DMA base address (Channel 0..6) (R/W)
+					@dma.madr channel, val
+				when 4 # D_BCR - DMA Block Control (Channel 0..6) (R/W)
+					@dma.bcr channel, val
+				when 8 # D_CHCR - DMA Channel Control (Channel 0..6) (R/W)
+					@dma.chcr channel, val
+				when 12 # 
+					phex32 'Nonexistent', offset
+					throw 'DMA fail'
 		else
 			switch offset
 				when 0x1f801000 # Expansion 1 Base Address (usually 1F000000h)
@@ -157,9 +166,9 @@ class HWBuffer
 
 				# DMA
 				when 0x1f8010f0 # DPCR - DMA Control register
-					assign 'DPCR'
-				#when 0x1f8010f4 # DICR - DMA Interrupt register
-				#	assign 'DICR'
+					@dma.dpcr val
+				when 0x1f8010f4 # DICR - DMA Interrupt register
+					@dma.dicr val
 
 				# Timers
 				when 0x1f801100 # Counter 0 value

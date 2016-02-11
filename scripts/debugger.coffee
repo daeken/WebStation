@@ -33,6 +33,7 @@ class Debugger
 
 		log = ''
 		@logel = $('#log')[0]
+		console.old_log = console.log
 		console.log = =>
 			for elem in arguments
 				log += elem + ' '
@@ -143,23 +144,29 @@ class Debugger
 	start: ->
 		return if @iv != null
 		@iv = interval 1, =>
-			for i in [0...insns_per]
-				ret = @run_one()
-				if @cpu.delay == null and @breakpoints[@cpu.pc] == 0
-					@running = false
-					phex 'Hit breakpoint @', @cpu.pc
-				for _, [expr, func] of @exprs
-					if func(@cpu) == true
+			try
+				for i in [0...insns_per]
+					@run_one()
+					if @cpu.delay == null and @breakpoints[@cpu.pc] == 0
 						@running = false
-						console.log 'Hit expr breakpoint', expr
-						break
-				break if not @running or ret != null
-			@center = if @cpu.delay != null then @cpu.delay else @cpu.pc
-			@update()
-			if not @running or ret != null
-				clearInterval @iv
-				@iv = null
-				throw ret if ret != null
+						phex 'Hit breakpoint @', @cpu.pc
+					for _, [expr, func] of @exprs
+						if func(@cpu) == true
+							@running = false
+							console.log 'Hit expr breakpoint', expr
+							break
+					break if not @running
+				@center = if @cpu.delay != null then @cpu.delay else @cpu.pc
+				@update()
+				if not @running
+					clearInterval @iv
+					@iv = null
+			catch e
+				if e instanceof Exception
+					return
+				clearInterval @iv if @iv != null
+				console.old_log e
+				throw e
 
 	update: ->
 		@logel.scrollTop = @logel.scrollHeight
