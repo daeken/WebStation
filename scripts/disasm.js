@@ -36,7 +36,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					return((('sllv ') + (regname($rd))) + (((', ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rs))))));
+					return((('sllv ') + (regname($rd))) + (((', ') + (regname($rt))) + ((', ') + (regname($rs)))));
 					break;
 				}
 				case 0x6: {
@@ -150,6 +150,15 @@ function disassemble(pc, inst) {
 					return((('div ') + (regname($rs))) + ((', ') + (regname($rt))));
 					break;
 				}
+				case 0x1b: {
+					/* DIVU */
+					$rs = ((inst) >>> (0x15)) & (0x1f);
+					$rt = ((inst) >>> (0x10)) & (0x1f);
+					$rd = ((inst) >>> (0xb)) & (0x1f);
+					$shamt = ((inst) >>> (0x6)) & (0x1f);
+					return((('divu ') + (regname($rs))) + ((', ') + (regname($rt))));
+					break;
+				}
 				case 0x20: {
 					/* ADD */
 					$rs = ((inst) >>> (0x15)) & (0x1f);
@@ -165,7 +174,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					return((('addu ') + (regname($rd))) + (((', ') + (regname($rs))) + ((', ') + (('0x') + (hexify($rt))))));
+					return((('addu ') + (regname($rd))) + (((', ') + (regname($rs))) + ((', ') + (regname($rt)))));
 					break;
 				}
 				case 0x22: {
@@ -228,7 +237,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					return((('slt ') + (regname($rd))) + (((', ') + (regname($rs))) + ((', ') + (('0x') + (hexify($rt))))));
+					return((('slt ') + (regname($rd))) + (((', ') + (regname($rs))) + ((', ') + (regname($rt)))));
 					break;
 				}
 				case 0x2b: {
@@ -423,7 +432,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('MFC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('mfc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x2: {
@@ -432,7 +441,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('CFC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('cfc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x4: {
@@ -441,7 +450,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('MTC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('mtc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x6: {
@@ -450,7 +459,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('CTC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('ctc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x10: {
@@ -459,7 +468,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x11: {
@@ -468,7 +477,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x12: {
@@ -477,7 +486,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x13: {
@@ -486,7 +495,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x14: {
@@ -495,7 +504,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x15: {
@@ -504,7 +513,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x16: {
@@ -513,7 +522,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x17: {
@@ -522,7 +531,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x18: {
@@ -531,7 +540,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x19: {
@@ -540,7 +549,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1a: {
@@ -549,7 +558,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1b: {
@@ -558,7 +567,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1c: {
@@ -567,7 +576,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1d: {
@@ -576,7 +585,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1e: {
@@ -585,7 +594,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1f: {
@@ -594,7 +603,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 			}
@@ -608,7 +617,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('MFC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('mfc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x2: {
@@ -617,7 +626,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('CFC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('cfc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x4: {
@@ -626,7 +635,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('MTC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('mtc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x6: {
@@ -635,7 +644,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('CTC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('ctc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x10: {
@@ -644,7 +653,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x11: {
@@ -653,7 +662,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x12: {
@@ -662,7 +671,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x13: {
@@ -671,7 +680,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x14: {
@@ -680,7 +689,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x15: {
@@ -689,7 +698,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x16: {
@@ -698,7 +707,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x17: {
@@ -707,7 +716,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x18: {
@@ -716,7 +725,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x19: {
@@ -725,7 +734,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1a: {
@@ -734,7 +743,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1b: {
@@ -743,7 +752,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1c: {
@@ -752,7 +761,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1d: {
@@ -761,7 +770,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1e: {
@@ -770,7 +779,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1f: {
@@ -779,7 +788,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 			}
@@ -793,7 +802,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('MFC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('mfc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x2: {
@@ -802,7 +811,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('CFC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('cfc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x4: {
@@ -811,7 +820,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('MTC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('mtc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x6: {
@@ -820,7 +829,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('CTC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('ctc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x10: {
@@ -829,7 +838,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x11: {
@@ -838,7 +847,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x12: {
@@ -847,7 +856,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x13: {
@@ -856,7 +865,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x14: {
@@ -865,7 +874,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x15: {
@@ -874,7 +883,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x16: {
@@ -883,7 +892,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x17: {
@@ -892,7 +901,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x18: {
@@ -901,7 +910,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x19: {
@@ -910,7 +919,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1a: {
@@ -919,7 +928,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1b: {
@@ -928,7 +937,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1c: {
@@ -937,7 +946,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1d: {
@@ -946,7 +955,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1e: {
@@ -955,7 +964,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1f: {
@@ -964,7 +973,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 			}
@@ -978,7 +987,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('MFC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('mfc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x2: {
@@ -987,7 +996,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('CFC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('cfc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x4: {
@@ -996,7 +1005,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('MTC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('mtc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x6: {
@@ -1005,7 +1014,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('CTC') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
+					return((('ctc') + (('0x') + (hexify($cop)))) + (((' ') + (regname($rt))) + ((', ') + (('0x') + (hexify($rd))))));
 					break;
 				}
 				case 0x10: {
@@ -1014,7 +1023,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x11: {
@@ -1023,7 +1032,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x12: {
@@ -1032,7 +1041,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x13: {
@@ -1041,7 +1050,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x14: {
@@ -1050,7 +1059,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x15: {
@@ -1059,7 +1068,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x16: {
@@ -1068,7 +1077,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x17: {
@@ -1077,7 +1086,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x18: {
@@ -1086,7 +1095,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x19: {
@@ -1095,7 +1104,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1a: {
@@ -1104,7 +1113,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1b: {
@@ -1113,7 +1122,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1c: {
@@ -1122,7 +1131,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1d: {
@@ -1131,7 +1140,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1e: {
@@ -1140,7 +1149,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 				case 0x1f: {
@@ -1149,7 +1158,7 @@ function disassemble(pc, inst) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$cofun = (inst) & (0x1ffffff);
-					return((('COP') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
+					return((('cop') + (('0x') + (hexify($cop)))) + ((' ') + (('0x') + (hexify($cofun)))));
 					break;
 				}
 			}

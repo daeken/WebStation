@@ -52,7 +52,11 @@ REG_SP = i++
 REG_FP = i++
 REG_RA = i++
 
+COP0_CTXT = 4 # Probably never used
+COP0_BADV = 8 # This too
 COP0_SR = 12
+COP0_CAUSE = 13
+COP0_EPC = 14
 
 regnames = [
 	'$zero', '$at', 
@@ -84,3 +88,9 @@ interval = (delay, fn) ->
 
 overflow = (n) ->
 	((n >>> 0) & 0xFFFFFFFF00000000) != 0
+
+Syscall = 8
+ArithmeticOverflow = 12
+
+class Exception extends Error
+	constructor: (@message) ->

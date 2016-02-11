@@ -1,4 +1,4 @@
-document.addEventListener 'DOMContentLoaded', ->
+$(document).ready ->
 	loadBlob 'bios.bin', (bios) ->
 		console.log 'Starting'
 		cpu = new Cpu bios

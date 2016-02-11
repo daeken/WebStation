@@ -104,7 +104,7 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					if(($rd) != (0x0)) { (state.regs)[$rd] = hi; }
+					if(($rd) != (0x0)) { (state.regs)[$rd] = state.hi; }
 					return(true);
 					break;
 				}
@@ -114,7 +114,7 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					hi = (state.regs)[$rd];
+					state.hi = (state.regs)[$rd];
 					return(true);
 					break;
 				}
@@ -124,7 +124,7 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					if(($rd) != (0x0)) { (state.regs)[$rd] = lo; }
+					if(($rd) != (0x0)) { (state.regs)[$rd] = state.lo; }
 					return(true);
 					break;
 				}
@@ -134,7 +134,7 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					lo = (state.regs)[$rd];
+					state.lo = (state.regs)[$rd];
 					return(true);
 					break;
 				}
@@ -145,8 +145,8 @@ function interpret(pc, inst, state) {
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
 					$_t = ((state.regs)[$rs]) * ((state.regs)[$rt]);
-					lo = (($_t) & (0xffffffff)) >>> (0x0);
-					hi = ($_t) >>> (0x20);
+					state.lo = (($_t) & (0xffffffff)) >>> (0x0);
+					state.hi = ($_t) >>> (0x20);
 					return(true);
 					break;
 				}
@@ -157,8 +157,8 @@ function interpret(pc, inst, state) {
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
 					$_t = (((state.regs)[$rs]) >>> (0x0)) * (((state.regs)[$rt]) >>> (0x0));
-					lo = (($_t) & (0xffffffff)) >>> (0x0);
-					hi = ($_t) >>> (0x20);
+					state.lo = (($_t) & (0xffffffff)) >>> (0x0);
+					state.hi = ($_t) >>> (0x20);
 					return(true);
 					break;
 				}
@@ -168,8 +168,19 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					lo = ((state.regs)[$rs]) / ((state.regs)[$rt]);
-					hi = ((state.regs)[$rs]) % ((state.regs)[$rt]);
+					state.lo = (((state.regs)[$rs]) / ((state.regs)[$rt])) >>> (0x0);
+					state.hi = (((state.regs)[$rs]) % ((state.regs)[$rt])) >>> (0x0);
+					return(true);
+					break;
+				}
+				case 0x1b: {
+					/* DIVU */
+					$rs = ((inst) >>> (0x15)) & (0x1f);
+					$rt = ((inst) >>> (0x10)) & (0x1f);
+					$rd = ((inst) >>> (0xb)) & (0x1f);
+					$shamt = ((inst) >>> (0x6)) & (0x1f);
+					state.lo = ((((state.regs)[$rs]) >>> (0x0)) / (((state.regs)[$rt]) >>> (0x0))) >>> (0x0);
+					state.hi = ((((state.regs)[$rs]) >>> (0x0)) % (((state.regs)[$rt]) >>> (0x0))) >>> (0x0);
 					return(true);
 					break;
 				}
@@ -267,7 +278,7 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					if(((state.regs)[$rs]) < ((state.regs)[$rt])) {
+					if((((state.regs)[$rs]) | (0x0)) < (((state.regs)[$rt]) | (0x0))) {
 						if(($rd) != (0x0)) { (state.regs)[$rd] = 0x1; }
 					} else {
 						if(($rd) != (0x0)) { (state.regs)[$rd] = 0x0; }
@@ -300,7 +311,7 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$imm = (inst) & (0xffff);
 					$target = ((pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					if(((state.regs)[$rs]) < (0x0)) { state.branch($target); }
+					if((((state.regs)[$rs]) | (0x0)) < (0x0)) { state.branch($target); }
 					return(true);
 					break;
 				}
@@ -310,7 +321,7 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$imm = (inst) & (0xffff);
 					$target = ((pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					if(((state.regs)[$rs]) >= (0x0)) { state.branch($target); }
+					if((((state.regs)[$rs]) | (0x0)) >= (0x0)) { state.branch($target); }
 					return(true);
 					break;
 				}
@@ -321,7 +332,7 @@ function interpret(pc, inst, state) {
 					$imm = (inst) & (0xffff);
 					if((0x1f) != (0x0)) { (state.regs)[0x1f] = (pc) + (0x4); }
 					$target = ((pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					if(((state.regs)[$rs]) < (0x0)) { state.branch($target); }
+					if((((state.regs)[$rs]) | (0x0)) < (0x0)) { state.branch($target); }
 					return(true);
 					break;
 				}
@@ -332,7 +343,7 @@ function interpret(pc, inst, state) {
 					$imm = (inst) & (0xffff);
 					if((0x1f) != (0x0)) { (state.regs)[0x1f] = (pc) + (0x4); }
 					$target = ((pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					if(((state.regs)[$rs]) >= (0x0)) { state.branch($target); }
+					if((((state.regs)[$rs]) | (0x0)) >= (0x0)) { state.branch($target); }
 					return(true);
 					break;
 				}
@@ -362,7 +373,7 @@ function interpret(pc, inst, state) {
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$target = ((pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-			if(((state.regs)[$rs]) == ((state.regs)[$rt])) { state.branch($target); }
+			if((((state.regs)[$rs]) >>> (0x0)) == (((state.regs)[$rt]) >>> (0x0))) { state.branch($target); }
 			return(true);
 			break;
 		}
@@ -384,7 +395,7 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$imm = (inst) & (0xffff);
 					$target = ((pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					if(((state.regs)[$rs]) <= (0x0)) { state.branch($target); }
+					if((((state.regs)[$rs]) | (0x0)) <= (0x0)) { state.branch($target); }
 					return(true);
 					break;
 				}
@@ -399,7 +410,7 @@ function interpret(pc, inst, state) {
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$imm = (inst) & (0xffff);
 					$target = ((pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					if(((state.regs)[$rs]) > (0x0)) { state.branch($target); }
+					if((((state.regs)[$rs]) | (0x0)) > (0x0)) { state.branch($target); }
 					return(true);
 					break;
 				}
@@ -436,10 +447,10 @@ function interpret(pc, inst, state) {
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$eimm = signext(0x10, $imm);
-			if(((state.regs)[$rs]) < ($eimm)) {
-				if(($rd) != (0x0)) { (state.regs)[$rd] = 0x1; }
+			if((((state.regs)[$rs]) | (0x0)) < ($eimm)) {
+				if(($rt) != (0x0)) { (state.regs)[$rt] = 0x1; }
 			} else {
-				if(($rd) != (0x0)) { (state.regs)[$rd] = 0x0; }
+				if(($rt) != (0x0)) { (state.regs)[$rt] = 0x0; }
 			}
 			return(true);
 			break;
@@ -451,9 +462,9 @@ function interpret(pc, inst, state) {
 			$imm = (inst) & (0xffff);
 			$eimm = (signext(0x10, $imm)) >>> (0x0);
 			if((((state.regs)[$rs]) >>> (0x0)) < ($eimm)) {
-				if(($rd) != (0x0)) { (state.regs)[$rd] = 0x1; }
+				if(($rt) != (0x0)) { (state.regs)[$rt] = 0x1; }
 			} else {
-				if(($rd) != (0x0)) { (state.regs)[$rd] = 0x0; }
+				if(($rt) != (0x0)) { (state.regs)[$rt] = 0x0; }
 			}
 			return(true);
 			break;

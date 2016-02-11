@@ -1,13 +1,14 @@
 <!doctype html>
 <html>
 	<head>
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+		<script src="jquery-1.11.3.min.js"></script>
 		<script src="common.coffee"></script>
 		<script src="interp.js"></script>
 		<script src="disasm.js"></script>
 		<script src="memory.coffee"></script>
 		<script src="debugger.coffee"></script>
 		<script src="cpu.coffee"></script>
+		<script src="gpu.coffee"></script>
 		<script src="main.coffee"></script>
 		<link rel="stylesheet" type="text/css" href="style.css">
 		<title>WebStation</title>
@@ -18,20 +19,35 @@
 			<button id="go-stop">Go</button>
 			<button id="step">Step</button><br>
 			<br>
+			<input type="checkbox" id="log-branches"> <label for="log-branches">Log branches</label><br>
+			<h4>Breakpoints</h4>
 			<table id="breakpoints">
 				<tr><th>Address</th><th>Type</th></tr>
 			</table>
 			<br>
-			<h4>New Breakpoint</h4>
 			Address: <input type="text" id="new-bp-addr"><br>
 			Type: <select id="new-bp-type">
 				<option value="0">Execute</option>
 			</select><br>
-			<button id="new-bp">Add</button>
+			<button id="add-bp">Add</button><br>
+			<h4>Expr Breakpoints</h4>
+			<table id="exprs">
+				<tr><th>Expr</th></tr>
+			</table>
+			<br>
+			Expr: <input type="text" id="new-expr"><br>
+			<button id="add-expr">Add</button><br>
+			<h4>Log</h4>
+			<pre id="log">
+			</pre>
 		</div>
 		<div class="middle-column">
 			<pre id="disassembly">
-			</div>
+			</pre>
+			<pre id="memory">
+			</pre>
+			<button id="down">&darr;&darr;&darr;</button>&nbsp;
+			<button id="up">&uarr;&uarr;&uarr;</button>
 		</div>
 		<div class="right-column">
 			<table class="registers">
