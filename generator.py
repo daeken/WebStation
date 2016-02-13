@@ -118,30 +118,40 @@ def cleansexp(sexp):
 	else:
 		return sexp
 
-def decoder(code, vars, type):
+def find_deps(dag):
+	if isinstance(dag, str) or isinstance(dag, unicode):
+		return set([dag])
+	elif not isinstance(dag, list):
+		return set()
+
+	return reduce(lambda a, b: a|b, map(find_deps, dag[1:])) if len(dag) != 1 else set()
+
+def decoder(code, vars, type, dag):
+	def decl(name, val):
+		if name in deps:
+			vars.append(name)
+			code.append(('=', name, val))
+		else:
+			print 'Removed', name
+	deps = find_deps(dag)
 	if type == 'IType' or type == 'RIType':
-		vars += ['$rs', '$rt', '$imm']
-		code.append(('=', '$rs', ('&', ('>>>', 'inst', 21), 0x1F)))
-		code.append(('=', '$rt', ('&', ('>>>', 'inst', 16), 0x1F)))
-		code.append(('=', '$imm', ('&', 'inst', 0xFFFF)))
+		decl('$rs', ('&', ('>>>', 'inst', 21), 0x1F))
+		decl('$rt', ('&', ('>>>', 'inst', 16), 0x1F))
+		decl('$imm', ('&', 'inst', 0xFFFF))
 	elif type == 'JType':
-		vars += ['$imm']
-		code.append(('=', '$imm', ('&', 'inst', 0x3FFFFFF)))
+		decl('$imm', ('&', 'inst', 0x3FFFFFF))
 	elif type == 'RType':
-		vars += ['$rs', '$rt', '$rd', '$shamt']
-		code.append(('=', '$rs', ('&', ('>>>', 'inst', 21), 0x1F)))
-		code.append(('=', '$rt', ('&', ('>>>', 'inst', 16), 0x1F)))
-		code.append(('=', '$rd', ('&', ('>>>', 'inst', 11), 0x1F)))
-		code.append(('=', '$shamt', ('&', ('>>>', 'inst', 6), 0x1F)))
+		decl('$rs', ('&', ('>>>', 'inst', 21), 0x1F))
+		decl('$rt', ('&', ('>>>', 'inst', 16), 0x1F))
+		decl('$rd', ('&', ('>>>', 'inst', 11), 0x1F))
+		decl('$shamt', ('&', ('>>>', 'inst', 6), 0x1F))
 	elif type == 'SType':
-		vars += ['$code']
-		code.append(('=', '$code', ('&', ('>>>', 'inst', 6), 0x0FFFFF)))
+		decl('$code', ('&', ('>>>', 'inst', 6), 0x0FFFFF))
 	elif type == 'CFType':
-		vars += ['$cop', '$rt', '$rd', '$cofun']
-		code.append(('=', '$cop', ('&', ('>>>', 'inst', 26), 3)))
-		code.append(('=', '$rt', ('&', ('>>>', 'inst', 16), 0x1F)))
-		code.append(('=', '$rd', ('&', ('>>>', 'inst', 11), 0x1F)))
-		code.append(('=', '$cofun', ('&', 'inst', 0x01FFFFFF)))
+		decl('$cop', ('&', ('>>>', 'inst', 26), 3))
+		decl('$rt', ('&', ('>>>', 'inst', 16), 0x1F))
+		decl('$rd', ('&', ('>>>', 'inst', 11), 0x1F))
+		decl('$cofun', ('&', 'inst', 0x01FFFFFF))
 	else:
 		print 'Unknown instruction type:', type
 		assert False
@@ -149,7 +159,7 @@ def decoder(code, vars, type):
 def genDisasm((name, type, dasm, dag)):
 	code = [('comment', name)]
 	vars = []
-	decoder(code, vars, type)
+	decoder(code, vars, type, dag)
 
 	def subgen(dag):
 		if isinstance(dag, str) or isinstance(dag, unicode):
@@ -244,7 +254,7 @@ def dlog(dag, code, pos):
 def genInterp((name, type, dasm, dag)):
 	code = [('comment', name)]
 	vars = []
-	decoder(code, vars, type)
+	decoder(code, vars, type, dag)
 
 	def subgen(dag):
 		if isinstance(dag, str) or isinstance(dag, unicode):
