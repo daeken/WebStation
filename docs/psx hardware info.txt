@@ -1,0 +1,1281 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PSX Hardware Information
+By: rveach
+
+http://rveach.romhack.org/
+
+Version 1.1
+11/11/2012
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Has alot of good information taken from:
+	'Everything You Have Always Wanted to Know about the Playstation But Were Afraid to Ask'
+	'pcsxR' source
+	'GPU Peops Soft' and 'SPU Peops' source
+
+Tab size should be 8 spaces.
+
+Anything marked with '?'s is information that I am not totally sure about,
+but everything else should be accurate.
+
+Alot is almost done, just need to fill in some blanks.
+GTE may be left out for now.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Memory Map
+
+	00000000 - 0000FFFF	Kernel
+	00010000 - 001FFFFF	User Memory
+	1F000000 - 1F00FFFF	Parallel Port
+	1F800000 - 1F8003FF	Scratch Pad
+	1FC00000 - 1FC7FFFF	BIOS
+
+	Kernel/UserMemory/BIOS are mirrored at 80000000 (Cached) and A0000000 (not Cached)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SPU (Sound)
+GPU (Graphics)
+MDEC (Motion Decoding Chip, used to decode JPEG like images)
+SIO (Standard Input/Output)
+GTE (Geometry Transformation Engine)
+
+DMA 0 = MDECin
+DMA 1 = MDECout
+DMA 2 = GPU (lists and image data)
+DMA 3 = CDROM
+DMA 4 = SPU
+DMA 5 = PIO
+DMA 6 = GPU OTC
+	This creates an empty linked list ending at MADR, going in reverse order, with BCR entries.
+	It sets every size to 0, and each list points to the previous.
+
+Special Memory writes
+
+	DMA and Interrupts
+		MADR = Memory Address Register
+
+		BCR = Block Control Register (4 bytes)
+			bits  0 - 15 = blocksize in words			0000FFFF
+			bits 16 - 31 = amount of blocks				FFFF0000
+
+			amount to transfer in words = amount of blocks * block size
+
+		CHCR = Channel Control Register	(this will start the DMA) (4 bytes)
+			bit 0							00000001
+				Off - Recieving from DMA to CPU
+				On  - Sending from CPU to DMA
+			bit 9							00000200
+				On  - Transfer Continuous Stream
+			bit 10							00000400
+				On  - Transfer Linked List (GPU Only)
+			bit 24							01000000
+				Off - No DMA Transfer Busy
+				On  - Start/Busy DMA Transfer	
+		
+		0x1F801070	What interupts are ready to fire (2-4 bytes)
+			bit  0 - VBlank IRQ                                     0001
+			bit  1 - GPU Interrupt                                  0002
+			bit  2 - CDROM Interrupt                                0004
+			bit  3 - DMA Interrupt                                  0008
+			bit  4 - System Clock Counter                           0010
+			bit  5 - Horizontal Retrace Counter                     0020
+			bit  6 - Pixel Counter                                  0040
+			bit  7 - SIO Interrupt                                  0080
+			bit  8 - SIO1 IRQ (SPU???)                              0100
+			bit  9 - PIO ???
+			bit 10 - SIO ???
+			bit 11 - Exception ???
+			bit 12 - Memory Card ???
+			bit 13 - Memory Card ???
+			bit 14 - Memory Card ???
+		0x1F801074	What interrupts are enabled (if they aren't enabled here, then they never fire)
+				 (2-4 bytes)
+		
+			Interrupt Address: 0x80000080 (Game) or 0xbfc00180 (Bios ?)
+
+		0x1F801080	DMA0 MADR
+		0x1F801084	DMA0 BCR
+		0x1F801088	DMA0 CHCR
+
+		0x1F801090	DMA1 MADR
+		0x1F801094	DMA1 BCR
+		0x1F801098	DMA1 CHCR
+
+		0x1F8010A0	DMA2 MADR
+		0x1F8010A4	DMA2 BCR		(blocksize in words <= 0x10)
+		0x1F8010A8	DMA2 CHCR
+			Examples:
+			0x01000200 = vram to mem
+			0x01000201 = mem to vram
+			0x01000401 = dma chain (linked list)
+
+
+		0x1F8010B0	DMA3 MADR
+		0x1F8010B4	DMA3 BCR
+		0x1F8010B8	DMA3 CHCR
+			To read multiple bytes of CD sector
+
+		0x1F8010C0	DMA4 MADR
+		0x1F8010C4	DMA4 BCR
+		0x1F8010C8	DMA4 CHCR
+
+		0x1F8010D0	DMA5 MADR
+		0x1F8010D4	DMA5 BCR
+		0x1F8010D8	DMA5 CHCR
+
+		0x1F8010E0	DMA6 MADR
+		0x1F8010E4	DMA6 BC
+			Number of list entries
+		0x1F8010E8	DMA6 CHCR
+
+		0x1F8010F0	DMA Primary Control Register
+			bits  0 -  3 = DMA0
+			bits  4 -  7 = DMA1
+			bits  8 - 11 = DMA2
+			bits 12 - 15 = DMA3
+			bits 16 - 19 = DMA4
+			bits 20 - 23 = DMA5
+			bits 24 - 27 = DMA6
+				the top bit for each section is boolean for the DMA is enabled/disabled
+
+		0x1F8010F4	DMA Interrupt Control Register
+			???????
+
+	SIO (Controller/MemoryCard?????)
+		0x1F801040	(sio8) (accepts 1-4 bytes, just duplicates 1 byte calls)
+		0x1F801044	SIO Status (2 bytes)
+			Write
+				Ignored
+			Read
+				bit 0 - controller transfer is ready ???
+				bit 1 - memory card transfer is ready ???
+				bit 2 - transfer buffer is empty ???
+				bit 3 - parity error ???
+				bit 4 - memory card over run ???
+				bit 5 - framing error ???
+				bit 6 - synch detect ???
+				bit 7 - dsr ???
+				bit 8 - cts ???
+				bit 9 - IRQ ???
+
+		0x1F801048	SIO Mode (2 bytes)
+			No known use
+
+		0x1F80104A	SIO Control
+			bit  1 - ???
+			bit  4 - reset error (turns off IRQ on the status) ???
+			bit  6 - SIO reset (resets the controller so it can be read) ???
+			bit 13					2000
+				Off - controller 1
+				On  - controller 2
+
+		0x1F80104e	SIO Baud (2 bytes)
+			No known use
+
+	SIO1	?????
+		0x1F801050 (SIO1_Data8/SIO1_Data16/SIO1_Data32) (1 - 4 bytes)
+		0x1F801054 (SIO1_Stat16) (2 bytes)
+		0x1F80105a (SIO1_Ctrl16) (2 bytes)
+		0x1F80105e (SIO1_Baud16) (2 bytes)
+
+	CDROM
+		0x1F801800	CDREG0 (1 byte)
+			Read
+				bit 0                                           01
+					Off - REG1 command sent
+					On  - REG1 data read
+				bit 1                                           02
+					Off - data transfer finished
+					On  - data transfer read/in-progress
+				bit 5                                           20
+					On  - result ready
+				bit 6                                           40
+					On  - DMA ready
+				bit 7                                           80
+					On  - command being processed
+
+			Write
+				bit 0                                           01
+					Off - send command
+					On  - to get result
+
+		0x1F801801	CDREG1 (1 byte)
+			Read: results (only if they are ready)
+
+				1st byte of results is always the status of the command,
+				except GetLocL and GetLocP
+
+					bit 1 - command error detected
+					bit 2 - spindle motor rotating
+					bit 3 - seek error detected
+					bit 4 - once shell open
+					bit 5 - reading data sectors
+					bit 6 - seeking
+					bit 7 - playing CD-DA
+
+			Write: command
+
+				00 - Synch                              [synchronization use]
+				01 - NOP
+				02 - SetLoc     (minute, second, frame) [this sets the location to be used with other commands]
+				03 - Play                               [plays audio from last sector seeked]
+				04 - Forward                            [like cd player forward button]
+				05 - Backward                           [like cd player back button]
+				06 - ReadN                              [read with retry]
+				07 - Standby                            [aborts all current cd actions, but continues spinning]
+				08 - Stop                               [stop cd spinning]
+				09 - Pause                              [like cd player pause button]
+				0A - Init
+				0B - Mute                               [turns off cd sound playing]
+				0C - DeMute                             [turns on cd sound playing]
+				0D - SetFilter  (file, channel)		???
+				0E - SetMode    (mode)                  [sets read mode and spin speed]
+					bit 0 - CD-DA control (1 - on, 0 - off)
+					bit 1 - AutoPause control (1 - on, 0 - off)
+					bit 2 - report control (1 - on, 0 - off)
+					bit 3 - channel control (1 - on, 0 - off)
+					bit 4 - sector data size 2 (1 - 2328 bytes)
+					bit 5 - sector data size (1 - 2340 bytes, 0 - 2048 bytes)
+					bit 6 - ADPCM control (1 - On, 0 - Off)
+					bit 7 - speed (1 - double speed, 0 - normal speed)
+
+				0F - GetMode
+					returns the sector's current mode, file, and channel
+				10 - GetLocL                            [retrieves first 8 bytes of last sector header read]
+				11 - GetLocP                            [retrieves 8 bytes of sub-Q data for last sector read]
+					returns track number, index number,
+						MSF within track, MSF of entire disk
+				13 - GetTN                              [get first track number and number of tracks in the TOC]
+				14 - GetTD      (rack(BCD)) ????        ??????????
+				15 - SeekL                              [seek to location in SetLoc in data mode]
+				16 - SeekP                              [seek to location in SetLoc in audio mode]
+				19 - Test                               ???????
+				1A - ID
+				1B - ReadS
+				1C - Reset
+				1E - ReadTOC
+
+		0x1F801802	CDREG2 (1 byte)
+			Write
+				if CDREG1 bit 0 set,
+					if value is 07, clear parameters and bit 0-1 of CDREG1 (acknowledged irq)
+				else
+					add 1 byte to parameter for CDREG1 command
+			Read
+				read 1 byte of cd sector in dma
+
+		0x1F801803	CDREG3 (1 byte)
+			Write
+				07 - acknowledged irq
+				80 - set next available cd sector to be read in DMA pool
+			Read
+				low nibble
+					00 - No Interrupt
+					01 - Data Ready
+					02 - Command Complete
+					03 - Acknowledge
+					04 - End of Data Detected
+					05 - Error Detected
+
+	SPU
+		1f801C00	Voice 0, Volume Left (2 bytes)
+			Volume Mode
+				bits 0 - 13 = voice volume
+				bit 14
+					Off - Normal Phase
+					On  - Inverted Phase
+			Sweep Mode
+				bits 0 - 6 = voice volume
+				bit 12
+					Off - Normal Phase
+					On  - Inverted Phase
+				bit 13
+					Off - Increase
+					On  - Decrease
+				bit 14
+					Off - Linear Slope
+					On  - Exponential Slope
+				
+		1f801C02	Voice 0, Volume Right (2 bytes)
+		1f801C04	Voice 0, Pitch (2 bytes)
+			bits 0 - 13 = pitch
+		1f801C06	Voice 0, Start Address in Sound Buffer (divided by 8)
+		1f801C08	Voice 0, Attack/Decay/Sustain Level
+			bits 0 -  3 = sustain level
+			bits 4 -  7 = decay rate
+			bits 8 - 14 = attack rate
+			bit 15
+				Off - attack mode is linear
+				On  - attack mode is exponential
+		1f801C0A	Voice 0, Sustain/Release Rate (2 bytes)
+			bits  0 -  4 = release rate
+			bit 5
+				Off - linear decrease
+				On  - exponential decrease
+			bits  6 - 12 = sustain rate
+			bit 14
+				Off - sustain rate mode increase
+				On  - sustain rate mode decrease
+			bit 15
+				Off - sustain rate mode is linear
+				On  - sustain rate mode is exponential
+		1f801C0C	Voice 0, Current ASDR Volume (Read-Only) (2 bytes)
+		1f801C0E	Voice 0, Repeat Address (2 bytes)
+
+		1f801C10	Voice 1, Volume Left
+		1f801C12	Voice 1, Volume Right
+		1f801C14	Voice 1, Pitch
+		1f801C16	Voice 1, Start Address in Sound Buffer (divided by 8)
+		1f801C18	Voice 1, Attack/Decay/Sustain Level
+		1f801C1A	Voice 1, Sustain/Release Rate
+		1f801C1C	Voice 1, Current ASDR Volume (Read-Only)
+		1f801C1E	Voice 1, Repeat Address
+
+		1f801C20	Voice 2, Volume Left
+		1f801C22	Voice 2, Volume Right
+		1f801C24	Voice 2, Pitch
+		1f801C26	Voice 2, Start Address in Sound Buffer (divided by 8)
+		1f801C28	Voice 2, Attack/Decay/Sustain Level
+		1f801C2A	Voice 2, Sustain/Release Rate
+		1f801C2C	Voice 2, Current ASDR Volume (Read-Only)
+		1f801C2E	Voice 2, Repeat Address
+
+		1f801C30	Voice 3, Volume Left
+		1f801C32	Voice 3, Volume Right
+		1f801C34	Voice 3, Pitch
+		1f801C36	Voice 3, Start Address in Sound Buffer (divided by 8)
+		1f801C38	Voice 3, Attack/Decay/Sustain Level
+		1f801C3A	Voice 3, Sustain/Release Rate
+		1f801C3C	Voice 3, Current ASDR Volume (Read-Only)
+		1f801C3E	Voice 3, Repeat Address
+
+		1f801C40	Voice 4, Volume Left
+		1f801C42	Voice 4, Volume Right
+		1f801C44	Voice 4, Pitch
+		1f801C46	Voice 4, Start Address in Sound Buffer (divided by 8)
+		1f801C48	Voice 4, Attack/Decay/Sustain Level
+		1f801C4A	Voice 4, Sustain/Release Rate
+		1f801C4C	Voice 4, Current ASDR Volume (Read-Only)
+		1f801C4E	Voice 4, Repeat Address
+
+		1f801C50	Voice 5, Volume Left
+		1f801C52	Voice 5, Volume Right
+		1f801C54	Voice 5, Pitch
+		1f801C56	Voice 5, Start Address in Sound Buffer (divided by 8)
+		1f801C58	Voice 5, Attack/Decay/Sustain Level
+		1f801C5A	Voice 5, Sustain/Release Rate
+		1f801C5C	Voice 5, Current ASDR Volume (Read-Only)
+		1f801C5E	Voice 5, Repeat Address
+
+		1f801C60	Voice 6, Volume Left
+		1f801C62	Voice 6, Volume Right
+		1f801C64	Voice 6, Pitch
+		1f801C66	Voice 6, Start Address in Sound Buffer (divided by 8)
+		1f801C68	Voice 6, Attack/Decay/Sustain Level
+		1f801C6A	Voice 6, Sustain/Release Rate
+		1f801C6C	Voice 6, Current ASDR Volume (Read-Only)
+		1f801C6E	Voice 6, Repeat Address
+
+		1f801C70	Voice 7, Volume Left
+		1f801C72	Voice 7, Volume Right
+		1f801C74	Voice 7, Pitch
+		1f801C76	Voice 7, Start Address in Sound Buffer (divided by 8)
+		1f801C78	Voice 7, Attack/Decay/Sustain Level
+		1f801C7A	Voice 7, Sustain/Release Rate
+		1f801C7C	Voice 7, Current ASDR Volume (Read-Only)
+		1f801C7E	Voice 7, Repeat Address
+
+		1f801C80	Voice 8, Volume Left
+		1f801C82	Voice 8, Volume Right
+		1f801C84	Voice 8, Pitch
+		1f801C86	Voice 8, Start Address in Sound Buffer (divided by 8)
+		1f801C88	Voice 8, Attack/Decay/Sustain Level
+		1f801C8A	Voice 8, Sustain/Release Rate
+		1f801C8C	Voice 8, Current ASDR Volume (Read-Only)
+		1f801C8E	Voice 8, Repeat Address
+
+		1f801C90	Voice 9, Volume Left
+		1f801C92	Voice 9, Volume Right
+		1f801C94	Voice 9, Pitch
+		1f801C96	Voice 9, Start Address in Sound Buffer (divided by 8)
+		1f801C98	Voice 9, Attack/Decay/Sustain Level
+		1f801C9A	Voice 9, Sustain/Release Rate
+		1f801C9C	Voice 9, Current ASDR Volume (Read-Only)
+		1f801C9E	Voice 9, Repeat Address
+
+		1f801CA0	Voice A, Volume Left
+		1f801CA2	Voice A, Volume Right
+		1f801CA4	Voice A, Pitch
+		1f801CA6	Voice A, Start Address in Sound Buffer (divided by 8)
+		1f801CA8	Voice A, Attack/Decay/Sustain Level
+		1f801CAA	Voice A, Sustain/Release Rate
+		1f801CAC	Voice A, Current ASDR Volume (Read-Only)
+		1f801CAE	Voice A, Repeat Address
+
+		1f801CB0	Voice B, Volume Left
+		1f801CB2	Voice B, Volume Right
+		1f801CB4	Voice B, Pitch
+		1f801CB6	Voice B, Start Address in Sound Buffer (divided by 8)
+		1f801CB8	Voice B, Attack/Decay/Sustain Level
+		1f801CBA	Voice B, Sustain/Release Rate
+		1f801CBC	Voice B, Current ASDR Volume (Read-Only)
+		1f801CBE	Voice B, Repeat Address
+
+		1f801CC0	Voice C, Volume Left
+		1f801CC2	Voice C, Volume Right
+		1f801CC4	Voice C, Pitch
+		1f801CC6	Voice C, Start Address in Sound Buffer (divided by 8)
+		1f801CC8	Voice C, Attack/Decay/Sustain Level
+		1f801CCA	Voice C, Sustain/Release Rate
+		1f801CCC	Voice C, Current ASDR Volume (Read-Only)
+		1f801CCE	Voice C, Repeat Address
+
+		1f801CD0	Voice D, Volume Left
+		1f801CD2	Voice D, Volume Right
+		1f801CD4	Voice D, Pitch
+		1f801CD6	Voice D, Start Address in Sound Buffer (divided by 8)
+		1f801CD8	Voice D, Attack/Decay/Sustain Level
+		1f801CDA	Voice D, Sustain/Release Rate
+		1f801CDC	Voice D, Current ASDR Volume (Read-Only)
+		1f801CDE	Voice D, Repeat Address
+
+		1f801CE0	Voice E, Volume Left
+		1f801CE2	Voice E, Volume Right
+		1f801CE4	Voice E, Pitch
+		1f801CE6	Voice E, Start Address in Sound Buffer (divided by 8)
+		1f801CE8	Voice E, Attack/Decay/Sustain Level
+		1f801CEA	Voice E, Sustain/Release Rate
+		1f801CEC	Voice E, Current ASDR Volume (Read-Only)
+		1f801CEE	Voice E, Repeat Address
+
+		1f801CF0	Voice F, Volume Left
+		1f801CF2	Voice F, Volume Right
+		1f801CF4	Voice F, Pitch
+		1f801CF6	Voice F, Start Address in Sound Buffer (divided by 8)
+		1f801CF8	Voice F, Attack/Decay/Sustain Level
+		1f801CFA	Voice F, Sustain/Release Rate
+		1f801CFC	Voice F, Current ASDR Volume (Read-Only)
+		1f801CFE	Voice F, Repeat Address
+		
+		1f801D00	Voice 10, Volume Left
+		1f801D02	Voice 10, Volume Right
+		1f801D04	Voice 10, Pitch
+		1f801D06	Voice 10, Start Address in Sound Buffer (divided by 8)
+		1f801D08	Voice 10, Attack/Decay/Sustain Level
+		1f801D0A	Voice 10, Sustain/Release Rate
+		1f801D0C	Voice 10, Current ASDR Volume (Read-Only)
+		1f801D0E	Voice 10, Repeat Address
+
+		1f801D10	Voice 11, Volume Left
+		1f801D12	Voice 11, Volume Right
+		1f801D14	Voice 11, Pitch
+		1f801D16	Voice 11, Start Address in Sound Buffer (divided by 8)
+		1f801D18	Voice 11, Attack/Decay/Sustain Level
+		1f801D1A	Voice 11, Sustain/Release Rate
+		1f801D1C	Voice 11, Current ASDR Volume (Read-Only)
+		1f801D1E	Voice 11, Repeat Address
+
+		1f801D20	Voice 12, Volume Left
+		1f801D22	Voice 12, Volume Right
+		1f801D24	Voice 12, Pitch
+		1f801D26	Voice 12, Start Address in Sound Buffer (divided by 8)
+		1f801D28	Voice 12, Attack/Decay/Sustain Level
+		1f801D2A	Voice 12, Sustain/Release Rate
+		1f801D2C	Voice 12, Current ASDR Volume (Read-Only)
+		1f801D2E	Voice 12, Repeat Address
+
+		1f801D30	Voice 13, Volume Left
+		1f801D32	Voice 13, Volume Right
+		1f801D34	Voice 13, Pitch
+		1f801D36	Voice 13, Start Address in Sound Buffer (divided by 8)
+		1f801D38	Voice 13, Attack/Decay/Sustain Level
+		1f801D3A	Voice 13, Sustain/Release Rate
+		1f801D3C	Voice 13, Current ASDR Volume (Read-Only)
+		1f801D3E	Voice 13, Repeat Address
+
+		1f801D40	Voice 14, Volume Left
+		1f801D42	Voice 14, Volume Right
+		1f801D44	Voice 14, Pitch
+		1f801D46	Voice 14, Start Address in Sound Buffer (divided by 8)
+		1f801D48	Voice 14, Attack/Decay/Sustain Level
+		1f801D4A	Voice 14, Sustain/Release Rate
+		1f801D4C	Voice 14, Current ASDR Volume (Read-Only)
+		1f801D4E	Voice 14, Repeat Address
+
+		1f801D50	Voice 15, Volume Left
+		1f801D52	Voice 15, Volume Right
+		1f801D54	Voice 15, Pitch
+		1f801D56	Voice 15, Start Address in Sound Buffer (divided by 8)
+		1f801D58	Voice 15, Attack/Decay/Sustain Level
+		1f801D5A	Voice 15, Sustain/Release Rate
+		1f801D5C	Voice 15, Current ASDR Volume (Read-Only)
+		1f801D5E	Voice 15, Repeat Address
+
+		1f801D60	Voice 16, Volume Left
+		1f801D62	Voice 16, Volume Right
+		1f801D64	Voice 16, Pitch
+		1f801D66	Voice 16, Start Address in Sound Buffer (divided by 8)
+		1f801D68	Voice 16, Attack/Decay/Sustain Level
+		1f801D6A	Voice 16, Sustain/Release Rate
+		1f801D6C	Voice 16, Current ASDR Volume (Read-Only)
+		1f801D6E	Voice 16, Repeat Address
+
+		1f801D70	Voice 17, Volume Left
+		1f801D72	Voice 17, Volume Right
+		1f801D74	Voice 17, Pitch
+		1f801D76	Voice 17, Start Address in Sound Buffer (divided by 8)
+		1f801D78	Voice 17, Attack/Decay/Sustain Level
+		1f801D7A	Voice 17, Sustain/Release Rate
+		1f801D7C	Voice 17, Current ASDR Volume (Read-Only)
+		1f801D7E	Voice 17, Repeat Address
+		
+		1f801D80	Main Volume Left (2 bytes)
+		1f801D82	Main Volume Right (2 bytes)
+		
+		1f801D84	Reverberation Depth Left (2 bytes)
+		1f801D86	Reverberation Depth Right (2 bytes)
+		
+		1f801D86	Voice On (1) (2 bytes)
+			Each bit controls Voices for 0 - F
+		1f801D88	Voice On (2) (2 bytes)
+			Each bit controls Voices for 10 - 17
+		1f801D8C	Voice Off (1) (2 bytes)
+			Each bit controls Voices for 0 - F
+		1f801D8E	Voice Off (2) (2 bytes)
+			Each bit controls Voices for 10 - 17
+		1f801D90	Sets the Voice Channel Frequency Modulator (1) (2 bytes)
+			Each bit controls Voices for 0 - F
+		1f801D92	Sets the Voice Channel Frequency Modulator (2) (2 bytes)
+			Each bit controls Voices for 10 - 17
+		1f801D94	Sets the Voice Channel to Noise (1) (2 bytes)
+			Each bit controls Voices for 0 - F
+		1f801D96	Sets the Voice Channel to Noise (2) (2 bytes)
+			Each bit controls Voices for 10 - 17
+		1f801D98	Sets the Voice Channel to Reverb (1) (2 bytes)
+			Each bit controls Voices for 0 - F
+		1f801D9A	Sets the Voice Channel to Reverb (2) (2 bytes)
+			Each bit controls Voices for 10 - 17
+		1f801D9C	Tells if the Voice Channel is Muted or Not (1) (2 bytes)
+			Each bit repesents Voices 0 - F
+		1f801D9E	Tells if the Voice Channel is Muted or Not (2) (2 bytes)
+			Each bit repesents Voices 10 - 17
+
+		1f801DA2	Reverb Work Area Start (divided by 8) (2 bytes)
+		1f801DA4	Sound Buffer IRQ Address (divided by 8) (2 bytes)
+		
+		1f801DA6	Sound Buffer Address (divided by 8) (2 bytes)
+		1f801DA8	SPU Data (2 bytes)
+			Used to Read/Write data to the SPU Address
+			specified in the Sound Buffer Address (1F801DA6).
+			Each Read/Write increases the address by 2.
+		1f801DAA	SPU Control (2 bytes)
+			bit   0
+				Off = cd audio off
+				On  = cd audio on
+			bit   1
+				Off = external audio off
+				On  = external audio on
+			bit   2
+				Off = reverb for cd off
+				On  = reverb for cd on
+			bit   3
+				Off = reverb for external off
+				On  = reverb for external on
+			bits  4 -  5
+				01 = non-dma write (transfer through data register)
+				10 = DMA write
+				11 = DMA read
+			bit   6
+				Off = IRQ disabled
+				On  = IRQ enabled
+			bit   7
+				Off = reverb disabled
+				On  = reverb enabled
+			bits  8 - 13 = Noise Clock Frequency
+			bit  14
+				Off = mute SPU
+				On  = unmute SPU
+			bit  15
+				Off = SPU off
+				On  = SPU on
+		
+		1f801DAC	SPU Status (2 bytes)
+			??????
+		1f801DAE	SPU Status (2 bytes)
+			bit 10
+				Off = spu ready to transfer
+				On  = spu not ready to transfer
+			bit 11
+				Off = decoding in first half of buffer
+				On  = decoding in second half of buffer
+		
+		1f801DB0	CD Volume Left (2 bytes)
+			bits  0 - 14 = volume
+			bit 15
+				Off = normal phase
+				On  = inverted phase
+		1f801DB2	CD Volume Right (2 bytes)
+		
+		1f801DB4	External Volume Left (2 bytes)
+			bits  0 - 14 = volume
+			bit 15
+				Off = normal phase
+				On  = inverted phase
+		1f801DB6	External Volume Right (2 bytes)
+		
+		TODO: p. 79 reverb
+
+	
+	GPU
+		0x1F801810	GPU Data (4 bytes)
+			Used to read/write 1 word from/to the GPU
+		0x1F801814	GPU Status/Control (4 bytes)
+			Write: command
+				bits  0 - 15 = parameter                        0000FFFF
+				bits 16 - 31 = command                          FFFF0000
+				
+				command
+				00 - reset GPU (and turn off screen)
+				01 - reset command buffer
+				02 - reset IRQ
+				03 - display
+					parameter 0 - display enabled
+					          1 - display disabled
+				04 - DMA direction setup
+					parameter 0 - disabled
+					          2 - DMA CPU -> GPU
+					          3 - DMA GPU -> CPU
+				05 - set top-left corner of display area
+					parameter bits  0 -  9 = x coordinate       003FF
+					          bits 10 - 18 = y coordinate       7FC00
+				06 - set horizontal display range (relative to top-left corner)
+					parameter bits  0 - 11 = start x coordinate
+					          bits 12 - 23 = end x coordinate (not relative to start)
+				07 - set vertical display range (relative to top-left corner)
+					parameter bits  0 -  9 = start y coordinate
+					          bits 10 - 20 = end y coordinate (not relative to start)
+				08 - display mode
+					parameter bits 0 - 1
+							00 - width = 256 pixels
+							01 - 320
+							10 - 512
+							11 - 640
+					          bit 2 = height (0 - 240, 1 - 480)
+					          bit 3
+							Off - NTSC
+							On  - PAL
+					          bit 4
+							Off - 16-bit
+							On  - 24-bit
+					          bit 5
+							Off - interlace off
+							On  - interlace on
+					          bit 6
+							On  - width = 384 pixels
+					          bit 7 = reverse flag ?????
+				10 - gpu info
+					parameter 3 - draw area top-left
+					          4 - draw area bottom-right
+					          5 - draw offset
+					          7 - GPU type
+				
+				
+			Read: status
+				bits 0 - 3 = texture page X (value * 64)
+				bit  4     = texture page Y (value * 256)
+				bit  5 - 6 = semi transparent state
+				bits 7 - 8 = texture color mode
+					00 - 4-bit CLUT
+					01 - 8-bit CLUT
+					10 - 16-bit
+				bit 9
+					Off - dither Off
+					On  - dither On
+				bit 10
+					Off - draw to area prohibitied
+					On  - draw to area allowed
+				bit 11
+					Off - do not apply mask bit to pixels
+					On  - apply mask bit to pixels
+				bit 12
+					Off - draw over pixels with mask set
+					On  - no drawing to pixels with set mask bit
+				bits 16 - 18 = Width
+					000 - 256 pixels
+					010 - 320
+					100 - 512
+					110 - 640
+					001 - 384
+				bit 19       = height (0 - 240, 1 - 480)
+				bit 20       = video  (0 - NTSC, 1 - PAL)
+				bit 21
+					Off - 15-bit mode
+					On  - 24-bit mode
+				bit 22
+					Off - interlace off
+					On  - interlace on
+				bit 23
+					Off - display enabled
+					On  - display disabled
+				bit 26
+					Off - GPU is busy
+					On  - GPU is idle
+				bit 27
+					Off - not ready to send image
+					On  - ready
+				bit 28
+					Off - not ready to recieve commands
+					On  - ready
+				bits 29 - 30
+					00 - DMA off
+					10 - DMA CPU -> GPU
+					11 - DMA GPU -> CPU
+				bit 31
+					Off - drawing even lines in interlace mode
+					On  - drawing uneven lines in interlace mode
+
+	MDEC
+		0x1F801820	MDECin Control Register (4 bytes)
+			bits  0 - 15                                            0000FFFF
+				size of block to decode in DMA0
+			bit 25                                                  02000000
+				toggles whether to set bit 15 of the decompressed data (semi-transparency)
+			bit 27                                                  08000000
+				Off - 24-bit color
+				On  - 16-bit color
+			bits 28 - 31
+				command on DMA 0
+				3 - decode
+				4 - quantization table upload
+				6 - cosine table
+				
+		0x1F801824	MDECout Control Register (4 bytes)
+			Write
+				bit 31 - Reset (makes in/out control            80000000
+				         register be 0)
+			Read
+				
+				bit 23 - copies MDECin's bit 25                 00800000
+				bit 24                                          01000000
+					MDEC is trasnferring data to man memory???
+				bit 25 - copies MDECin's bit 27                 02000000
+				bits 27 - 28                                    18000000
+					Data Request???
+				bit 29                                          20000000
+					Off - MDEC1 is not busy transferring data
+					On  - MDEC1 is busy
+
+	Counters
+		0x1f801100	?????	TODO
+		0x1f801104	?????
+		0x1f801108	?????
+		0x1f801110	?????
+		0x1f801114	?????
+		0x1f801118	?????
+		0x1f801120	?????
+		0x1f801124	?????
+		0x1f801128	?????
+
+	Misc
+		0x1f801060	Read/Set PSX Memory Size (4 bytes)
+			Only accepted values by the BIOS is 2/8
+				B88 = 2	????
+		
+		0x1f802030	int_2000 ????
+		0x1f802040	dip ????
+				
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SPU
+	512kb buffer
+	data is stored compressed in blocks of 16 bytes
+		14 packed sample bytes
+		2 header bytes
+	uncompressed, it is 28 sample bytes
+
+	Memory Layout
+		0x00000-0x003ff		CD audio left
+		0x00400-0x007ff		CD audio right
+		0x00800-0x00bff		Voice 1
+		0x00c00-0x00fff		Voice 3
+		0x01000-0x0100f		System area
+		0x01008-0x0____		Sound data area
+		0x0____-0x7ffff		Reverb work area
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+GPU
+	Coordinates: 0,0 to 1023,511 (0x3FF,0x1FF)
+	
+	Display Modes: (write 0x08 to 0x1F801814 to set these modes)
+		Width:  256, 320, 360, 512, 640
+		Height: NTSC:
+		        240 (interlace off), 480 (interlace on)
+
+	Pixels/Color
+		16 bits:
+			bits  0 -  4 = red
+			bits  5 -  9 = green
+			bits 10 - 14 = blue
+			bit  15      = Mask
+
+		24 bits:
+			bits  0 -  7 = red
+			bits  8 - 15 = green
+			bits 16 - 23 = blue
+			
+	GPU Link List
+		1st Word
+			bits  0 - 23 = memory address of next link in the chain         00FFFFFF
+			               0xFFFFFF specifies no more links (end of chain)
+			bits 24 - 31 = number of words in the data                      FF000000
+		
+		All the data that follows is the command and parameters for that command
+			bits 24 - 31 = specifies the command                            FF000000
+	
+	Difference between Gradated and non-Gradated ????
+	
+	Commands
+		0x01 - Clear Cache
+		0x02 - Free-Size Filled Rectangle (ignores draw areas)
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd Word
+				bits  0 - 15 = absolute x location
+				bits 16 - 31 = absolute y location
+			3rd Word
+				bits  0 - 15 = width
+				bits 16 - 31 = height
+		0x20 to 0x23 - Smooth 3-Point Polygon
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+			4th Word
+				bits  0 - 15 = relative vertex x2 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y2 location (relative to last value of command [E5])
+		0x24 to 0x27 - Flat 3-Point Texture
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 -  7 = texture source vertex x0 (relative to this command)
+				bits  8 - 15 = texture source vertex y0 (relative to this command)
+				bits 16 - 31 = CLUT ???
+			4th Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+			5th Word
+				bits  0 -  7 = texture source vertex x1 (relative to this command)
+				bits  8 - 15 = texture source vertex y1 (relative to this command)
+				bits 16 - 31 = same as bits 0 - 10 in [E1],
+				               this affects other commands too just like [E1]
+			6th Word
+				bits  0 - 15 = relative vertex x2 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y2 location (relative to last value of command [E5])
+			7th Word
+				bits  0 -  7 = texture source vertex x2 (relative to this command)
+				bits  8 - 15 = texture source vertex y2 (relative to this command)
+		0x28 to 0x2B - Flat 4-Point Polygon
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+			4th Word
+				bits  0 - 15 = relative vertex x2 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y2 location (relative to last value of command [E5])
+			5th Word
+				bits  0 - 15 = relative vertex x3 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y3 location (relative to last value of command [E5])
+		0x2C to 0x2F - Flat 4-Point Texture
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 -  7 = texture source vertex x0 (relative to this command)
+				bits  8 - 15 = texture source vertex y0 (relative to this command)
+				bits 16 - 31 = CLUT ???
+			4th Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+			5th Word
+				bits  0 -  7 = texture source vertex x1 (relative to this command)
+				bits  8 - 15 = texture source vertex y1 (relative to this command)
+				bits 16 - 31 = same as bits 0 - 10 in [E1],
+				               this affects other commands too just like [E1]
+			6th Word
+				bits  0 - 15 = relative vertex x2 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y2 location (relative to last value of command [E5])
+			7th Word
+				bits  0 -  7 = texture source vertex x2 (relative to this command)
+				bits  8 - 15 = texture source vertex y2 (relative to this command)
+			8th Word
+				bits  0 - 15 = relative vertex x3 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y3 location (relative to last value of command [E5])
+			9th Word
+				bits  0 -  7 = texture source vertex x3 (relative to this command)
+				bits  8 - 15 = texture source vertex y3 (relative to this command)
+		0x30 to 0x33 - Smooth Shaded 3-Point Polygon
+			1st Word
+				bits  0 - 23 = 24-bit Color0
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 - 23 = 24-bit Color1
+			4th Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+			5th Word
+				bits  0 - 23 = 24-bit Color2
+			6th Word
+				bits  0 - 15 = relative vertex x2 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y2 location (relative to last value of command [E5])
+		0x34 to 0x37 - Shaded 3-Point Texture
+			1st Word
+				bits  0 - 23 = 24-bit Color0
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 -  7 = texture source vertex x0 (relative to this command)
+				bits  8 - 15 = texture source vertex y0 (relative to this command)
+				bits 16 - 31 = CLUT ???
+			4th Word
+				bits  0 - 23 = 24-bit Color1
+			5th Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+			6th Word
+				bits  0 -  7 = texture source vertex x1 (relative to this command)
+				bits  8 - 15 = texture source vertex y1 (relative to this command)
+				bits 16 - 31 = same as bits 0 - 10 in [E1],
+				               this affects other commands too just like [E1]
+			7th Word
+				bits  0 - 23 = 24-bit Color2
+			8th Word
+				bits  0 - 15 = relative vertex x2 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y2 location (relative to last value of command [E5])
+			9th Word
+				bits  0 -  7 = texture source vertex x2 (relative to this command)
+				bits  8 - 15 = texture source vertex y2 (relative to this command)
+		0x38 to 0x3B - Shaded 4-Point Polygon
+			1st Word
+				bits  0 - 23 = 24-bit Color0
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 - 23 = 24-bit Color1
+			4th Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+			5th Word
+				bits  0 - 23 = 24-bit Color2
+			6th Word
+				bits  0 - 15 = relative vertex x2 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y2 location (relative to last value of command [E5])
+			7th Word
+				bits  0 - 23 = 24-bit Color3
+			8th Word
+				bits  0 - 15 = relative vertex x3 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y3 location (relative to last value of command [E5])
+		0x3C to 0x3F - Shaded 4-Point Texture
+			1st Word
+				bits  0 - 23 = 24-bit Color0
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 -  7 = texture source vertex x0 (relative to this command)
+				bits  8 - 15 = texture source vertex y0 (relative to this command)
+				bits 16 - 31 = CLUT ???
+			4th Word
+				bits  0 - 23 = 24-bit Color1
+			5th Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+			6th Word
+				bits  0 -  7 = texture source vertex x1 (relative to this command)
+				bits  8 - 15 = texture source vertex y1 (relative to this command)
+				bits 16 - 31 = same as bits 0 - 10 in [E1],
+				               this affects other commands too just like [E1]
+			7th Word
+				bits  0 - 23 = 24-bit Color2
+			8th Word
+				bits  0 - 15 = relative vertex x2 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y2 location (relative to last value of command [E5])
+			9th Word
+				bits  0 -  7 = texture source vertex x2 (relative to this command)
+				bits  8 - 15 = texture source vertex y2 (relative to this command)
+			10th Word
+				bits  0 - 23 = 24-bit Color3
+			11th Word
+				bits  0 - 15 = relative vertex x3 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y3 location (relative to last value of command [E5])
+			12th Word
+				bits  0 -  7 = texture source vertex x3 (relative to this command)
+				bits  8 - 15 = texture source vertex y3 (relative to this command)
+		0x40 to 0x43 - Flat 2-Point PolyLine (F?)
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+		0x48 to 0x4F - Flat Multiple 2-Point PolyLines (Single Color)
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd to Last-1 Word
+				bits  0 - 15 = relative vertex xN location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex yN location (relative to last value of command [E5])
+			Last Word
+				0x55555555 (Termination Code)
+		0x50 to 0x53 - Shaded 2-Point PolyLine
+			1st Word
+				bits  0 - 23 = 24-bit Color0
+			2nd Word
+				bits  0 - 15 = relative vertex x0 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y0 location (relative to last value of command [E5])
+			3rd Word
+				bits  0 - 23 = 24-bit Color1
+			4th Word
+				bits  0 - 15 = relative vertex x1 location (relative to last value of command [E5])
+				bits 16 - 31 = relative vertex y1 location (relative to last value of command [E5])
+		0x58 to 0x5F - Shaded Multiple 2-Point PolyLines (Multiple Colors)
+			1st to Last-2 Word
+				1st Word
+					bits  0 - 23 = 24-bit ColorN
+				2nd Word
+					bits  0 - 15 = relative vertex xN location (relative to last value of command [E5])
+					bits 16 - 31 = relative vertex yN location (relative to last value of command [E5])
+			Last Word
+				0x55555555 (Termination Code)
+		0x60 to 0x63 - Free-Size Filled Rectangle (doesn't ignore draw areas)
+			1st Word
+				bits  0 - 23 = 24-bit Color ???
+			2nd Word
+				bits  0 - 15 = x location (relative to last value of command [E5])
+				bits 16 - 31 = y location (relative to last value of command [E5])
+			3rd Word
+				bits  0 - 15 = width
+				bits 16 - 31 = height
+		0x64 to 0x67 - Free-Size Sprite
+			1st Word
+				bits  0 - 23 = 24-bit Color ???
+			2nd Word
+				bits  0 - 15 = sprite destination x (relative to last value of command [E5])
+				bits 16 - 31 = sprite destination y (relative to last value of command [E5])
+			3rd Word
+				bits  0 -  7 = texture source x (relative to [E1/24/2C/34/3C])
+				bits  8 - 15 = texture source y (relative to [E1/24/2C/34/3C])
+				bits 16 - 31 = CLUT ???
+			4th Word
+				bits  0 - 15 = sprite width
+				bits 16 - 31 = sprite height
+		0x68 to 0x6B - Point
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd Word
+				bits  0 - 15 = x location (relative to last value of command [E5])
+				bits 16 - 31 = y location (relative to last value of command [E5])
+		0x70 to 0x73 - 8x8 Filled Rectangle
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd Word
+				bits  0 - 15 = x location (relative to last value of command [E5])
+				bits 16 - 31 = y location (relative to last value of command [E5])
+		0x74 to 0x77 - 8x8 Sprite
+			1st Word
+				bits  0 - 23 = 24-bit Color ???
+			2nd Word
+				bits  0 - 15 = sprite destination x (relative to last value of command [E5])
+				bits 16 - 31 = sprite destination y (relative to last value of command [E5])
+			3rd Word
+				bits  0 -  7 = texture source x (relative to [E1/24/2C/34/3C])
+				bits  8 - 15 = texture source y (relative to [E1/24/2C/34/3C])
+				bits 16 - 31 = CLUT ???
+		0x78 to 0x7B - 16x16 Filled Rectangle
+			1st Word
+				bits  0 - 23 = 24-bit Color
+			2nd Word
+				bits  0 - 15 = x location (relative to last value of command [E5])
+				bits 16 - 31 = y location (relative to last value of command [E5])
+		0x7C to 0x7F - 16x16 Sprite
+			1st Word
+				bits  0 - 23 = 24-bit Color ???
+			2nd Word
+				bits  0 - 15 = sprite destination x (relative to last value of command [E5])
+				bits 16 - 31 = sprite destination y (relative to last value of command [E5])
+			3rd Word
+				bits  0 -  7 = texture source x (relative to [E1/24/2C/34/3C])
+				bits  8 - 15 = texture source y (relative to [E1/24/2C/34/3C])
+				bits 16 - 31 = CLUT ???
+		0x80 - Move Image in Frame Buffer
+			1st Word
+				bits  0 - 23 = 24-bit Color ???
+			2nd Word
+				bits  0 - 15 = absolute x source location
+				bits 16 - 31 = absolute y source location
+			3rd Word
+				bits  0 - 15 = absolute x destination location
+				bits 16 - 31 = absolute y destination location
+			4th Word
+				bits  0 - 15 = width (width * 2 = number pixels in width)
+				bits 16 - 31 = height
+		0xA0 - Send Image to Frame Buffer
+			1st Word
+				bits  0 - 23 = 24-bit Color ???
+			2nd Word
+				bits  0 - 15 = absolute x destination location
+				bits 16 - 31 = absolute y destination location
+			3rd Word
+				bits  0 - 15 = width (width * 2 = number pixels in width)
+				bits 16 - 31 = height
+			4th+ Words
+				16-bit Image Data
+		0xC0 - Copy Image from Frame Buffer (Data can be read from DMA 2)
+			1st Word
+				bits  0 - 23 = 24-bit Color ???
+			2nd Word
+				bits  0 - 15 = absolute x destination location
+				bits 16 - 31 = absolute y destination location
+			3rd Word
+				bits  0 - 15 = width (width * 2 = number pixels in width)
+				bits 16 - 31 = height
+		0xE1 - Draw Mode Setting
+			bits  0 -  3 = absolute texture x offset (x = value * 64)
+			bits  4      = absolute texture y offset (y = value * 256)
+			bits  5 -  6 = semi transparency mode
+			bits  7 -  8
+				0 = 4-bit CLUT
+				1 = 8-bit CLUT
+				2 = 15-bit direct
+			bits  9
+				Off = dither off
+				On  = dither on
+			bits 10
+				Off - draw to area prohibitied
+				On  - draw to area allowed
+		0xE2 - Texture Window Setting (??? where is this used in other commands ???)
+			bits  0 -  4 = height (height = 256 - value * 8)
+			bits  5 -  9 = width (width = 256 - value * 8)
+			bits 10 - 14 = y (y = value * 8)
+			bits 15 - 19 = x (x = value * 8)
+		0xE3 - Drawing Area Top Left
+			bits  0 -  9 = x coordinate                             0003FF
+			bits 10 - 19 = y coordinate				0FFC00
+		0xE4 - Drawing Area Width and Height
+			bits  0 -  9 = width                                    0003FF
+			bits 10 - 19 = height                                   0FFC00
+		0xE5 - Drawing Offset
+			bits  0 - 10 = absolute x offset                        0007FF
+			bits 11 - 21 = absolute y offset                        3FF800
+		0xE6 - Drawing Masks ??????
+			bit 0 = set mask bit while drawing ???
+			bit 1 = do not draw to mask areas ???
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MDEC Data Fomat
+
++------------+      +------------+          +------------+
+| Header     |      | Cb block   | ---+---> |  DCT       |
++------------+      +------------+    |     +------------+
+| MacroBlock | ---> | Cr block   | ---+     |  RLE       |
++------------+      +------------+    |     +------------+
+| .......    |      | Y0 block   | ---+     |  ....      |
++------------+      +------------+    |     +------------+
+| MacroBlock |      | Y1 block   | ---+     |  RLE       |
++------------+      +------------+    |     +------------+
+| Footer     |      | Y2 block   | ---+     |  EOD       |
++------------+      +------------+    |     +------------+
+                    | Y3 block   | ---+
+                    +------------+
+
+	Header
+		bits  0 - 15 = size (of all blocks????)
+		bits 16 - 31 = constant 0x3800
+	
+	Footer and EOD (End of Data)
+		bits 0 - 15 = constant 0xFE00
+	
+	Cb/Cr = color difference blocks
+	Y0 to Y3 = luminescence blocks
+	
+	DCT
+		bits  0 -  9 = direct current reference (signed)
+		bits 10 - 15 = quantization factor (unsigned)
+	
+	RLE
+		bits  0 -  9 = data (signed)
+		bits 10 - 15 = number of zeros between data (unsigned)
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+GTE
+	p. 51
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			How to work CDRREGs
+
+To send a command:
+	- First send any arguments
+		- write 0 to CDREG0
+		- write all arguments sequentially to CDREG2
+	- Then write 0 to CDREG0, and the command to CDREG1.
+
+To wait for a command to complete:
+	- Wait until a CDrom irq occurs (bit 2 of the interrupt regs) The cause of the cdrom
+	irq is in the low nibble of CDREG3. This is usually 3 on a succesful comletion. Failure
+	to complete the command will result in a 5. If you don't wish to use irq's you can just
+	check for the low nibble of cdreg3 to become something other than 0, but make sure it
+	doesn't get cleared in any irq setup by the bios or some such.
+
+To Get the results:
+	- write a 1 to CDREG0
+	- read CDREG0. If bit 5 is set,
+		- read a return value from CDREG1
+		- then read CDREG0
+	- repeat read until bit 5 goes low.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			How to work GPU
+
+Initializing the GPU
+	- Reset the GPU (GP1 command $00). This turns off the display as well.
+	- Set horizontal and vertical start/end. (GP1 command $06, $07)
+	- Set display mode. (GP1 command $08)
+	- Set display offset. (GP1 command $05)
+	- Set draw mode. (GP0 command $e1)
+	- Set draw area. (GP0 command $e3, $e4)
+	- Set draw offset. (GP0 command $e5)
+	- Enable display.
+
+p. 47 TODO more
+
+Waiting to send commands
+	- Wait for bit $18 to become 0 in D2_CHCR
+	- Wait for bit $1c to become 1 in GP1.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

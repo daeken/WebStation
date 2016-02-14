@@ -20,7 +20,14 @@ Running
 
 Then just browse to http://localhost:23109
 
+License
+=======
+
+WebStation is licensed under CC0, making it public domain.  Do whatever you want with it, just don't sue me if your browser catches fire.
+
 Credits
 =======
 
 All code by myself, Cody Brocious (Daeken).  But I couldn't have done any of this without the amazing docs out there, or without reading Ruststation (https://github.com/simias/rustation/) source when I got stuck.
+
+I've compiled all the docs I've used into the `docs/` directory of this repo.  They are owned by their respective authors and the license **does not** apply to them.
