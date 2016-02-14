@@ -1,4 +1,5 @@
-import re, struct
+import json, re, struct
+import os.path
 from tblgen import interpret, Dag, TableGenBits
 
 def dag2expr(dag):
@@ -15,10 +16,15 @@ def dag2expr(dag):
 	else:
 		return dag
 
-insts = interpret('insts.td').deriving('BaseInst')
-ops = []
-for name, (bases, data) in insts:
-	ops.append((name, bases[1], data['Opcode'][1], data['Function'][1] if 'Function' in data else None, data['Disasm'][1], dag2expr(data['Eval'][1])))
+if not os.path.exists('insts.td.cache') or os.path.getmtime('insts.td') > os.path.getmtime('insts.td.cache'):
+	insts = interpret('insts.td').deriving('BaseInst')
+	ops = []
+	for name, (bases, data) in insts:
+		ops.append((name, bases[1], data['Opcode'][1], data['Function'][1] if 'Function' in data else None, data['Disasm'][1], dag2expr(data['Eval'][1])))
+	with file('insts.td.cache', 'w') as fp:
+		json.dump(ops, fp)
+else:
+	ops = json.load(file('insts.td.cache'))
 
 toplevel = {}
 
@@ -56,37 +62,45 @@ def indent(str, single=True):
 	else:
 		return '\n%s\n' % '\n'.join('\t' + x for x in str.split('\n'))
 
-def output(expr, top=True):
+def output(expr, top=True, emitting=False):
 	if isinstance(expr, list):
-		return '\n'.join(output(x, top=top) for x in expr)
+		return '\n'.join(output(x, top=top, emitting=emitting) for x in expr)
 	elif isinstance(expr, int) or isinstance(expr, long):
 		return '0x%x' % expr
 	elif isinstance(expr, str) or isinstance(expr, unicode):
-		return expr
+		if emitting and expr.startswith('$') and not expr.startswith('$_'):
+			return '" + %s + "' % expr
+		else:
+			return expr
 
 	op = expr[0]
 	if op == 'switch':
-		return 'switch(%s) {%s}' % (output(expr[1]), indent(output(expr[2])))
+		return 'switch(%s) {%s}' % (output(expr[1], emitting=emitting), indent(output(expr[2], emitting=emitting)))
 	elif op == 'case':
-		return 'case %s: {%s\tbreak;\n}' % (output(expr[1]), indent(output(expr[2]), single=False))
+		return 'case %s: {%s\tbreak;\n}' % (output(expr[1], emitting=emitting), indent(output(expr[2], emitting=emitting), single=False))
 	elif op in ('+', '-', '*', '/', '%', '<<', '>>', '>>>', '&', '|', '^', '==', '!=', '<', '<=', '>', '>='):
-		return '(%s) %s (%s)' % (output(expr[1], top=False), op, output(expr[2], top=False))
+		return '(%s) %s (%s)' % (output(expr[1], top=False, emitting=emitting), op, output(expr[2], top=False, emitting=emitting))
 	elif op == '!':
-		return '!(%s)' % output(expr[1], top=False)
+		return '!(%s)' % output(expr[1], top=False, emitting=emitting)
 	elif op == '=':
-		return '%s %s %s;' % (output(expr[1], top=False), op, output(expr[2], top=False))
+		return '%s %s %s;' % (output(expr[1], top=False, emitting=emitting), op, output(expr[2], top=False, emitting=emitting))
 	elif op == 'if':
-		return 'if(%s) {%s} else {%s}' % (output(expr[1], top=False), indent(output(expr[2]), single=False), indent(output(expr[3]), single=False))
+		return 'if(%s) {%s} else {%s}' % (output(expr[1], top=False, emitting=emitting), indent(output(expr[2], emitting=emitting), single=False), indent(output(expr[3], emitting=emitting), single=False))
 	elif op == 'when':
-		return 'if(%s) {%s}' % (output(expr[1], top=False), indent(output(expr[2])))
+		return 'if(%s) {%s}' % (output(expr[1], top=False, emitting=emitting), indent(output(expr[2], emitting=emitting)))
 	elif op == 'comment':
-		return '/*%s*/' % indent(output(expr[1]))
+		return '/*%s*/' % indent(output(expr[1], emitting=emitting))
 	elif op == 'str':
 		return `str(expr[1])`
 	elif op == 'index':
-		return '(%s)[%s]' % (output(expr[1], top=False), output(expr[2], top=False))
+		return '(%s)[%s]' % (output(expr[1], top=False, emitting=emitting), output(expr[2], top=False, emitting=emitting))
+	elif op == 'emit':
+		if emitting:
+			return output(expr[1], top=False, emitting=True)
+		else:
+			return 'emit("%s");' % (output(expr[1], top=True, emitting=True).replace('\n', '\\n').replace('"" + ', '').replace(' + ""', ''))
 	else:
-		return '%s(%s)%s' % (op, ', '.join(output(x, top=False) for x in expr[1:]), ';' if top else '')
+		return '%s(%s)%s' % (op, ', '.join(output(x, top=False, emitting=emitting) for x in expr[1:]), ';' if top else '')
 
 gops = {
 	'add' : lambda a, b: ('+', a, b), 
@@ -131,8 +145,6 @@ def decoder(code, vars, type, dag):
 		if name in deps:
 			vars.append(name)
 			code.append(('=', name, val))
-		else:
-			print 'Removed', name
 	deps = find_deps(dag)
 	if type == 'IType' or type == 'RIType':
 		decl('$rs', ('&', ('>>>', 'inst', 21), 0x1F))
@@ -170,7 +182,7 @@ def genDisasm((name, type, dasm, dag)):
 			print 'Fail', `dag`
 			assert False
 		op = dag[0]
-		if op == 'let':
+		if op in ('let', 'rlet'):
 			# Ignore any leading underscore vars
 			if dag[1].startswith('$_'):
 				return []
@@ -265,7 +277,7 @@ def genInterp((name, type, dasm, dag)):
 			print 'Fail', dag
 			assert False
 		op = dag[0]
-		if op == 'let':
+		if op in ('let', 'rlet'):
 			if dag[1] not in vars:
 				vars.append(dag[1])
 			return [('=', dag[1], subgen(dag[2]))] + subgen(['block'] + dag[3:])
@@ -348,6 +360,92 @@ def genInterp((name, type, dasm, dag)):
 
 	return code
 
+def genDecomp((name, type, dasm, dag)):
+	code = [('comment', name)]
+	vars = []
+	decoder(code, vars, type, dag)
+
+	def subgen(dag):
+		if isinstance(dag, str) or isinstance(dag, unicode):
+			return dag
+		elif isinstance(dag, int) or isinstance(dag, long):
+			return dag
+		elif not isinstance(dag, list):
+			print 'Fail', dag
+			assert False
+		op = dag[0]
+		if op in ('let', 'rlet'):
+			if dag[1] not in vars:
+				vars.append(dag[1])
+			ret = [('=', dag[1], subgen(dag[2]))] + subgen(['block'] + dag[3:])
+			if op == 'rlet':
+				return [('emit', ret)]
+			else:
+				return ret
+		elif op == 'set':
+			left = dag[1]
+			if left[0] == 'copreg':
+				return [('emit', ('state.copreg', subgen(left[1]), subgen(left[2]), subgen(dag[2])))]
+			elif left[0] == 'copcreg':
+				return [('emit', ('state.copcreg', subgen(left[1]), subgen(left[2]), subgen(dag[2])))]
+			else:
+				leftjs = subgen(left)
+				ret = [('emit', ('=', leftjs, subgen(dag[2])))]
+				if left[0] == 'gpr':
+					ret = [('when', ('!=', left[1], 0), ret)]
+				return ret
+		# XXX: Conditionals should detect if they can happen at decompile-time
+		elif op == 'if':
+			return [('emit', ('if', subgen(dag[1]), subgen(dag[2]), subgen(dag[3])))]
+		elif op == 'when':
+			return [('emit', ('when', subgen(dag[1]), subgen(dag[2])))]
+		elif op in gops:
+			return gops[op](subgen(dag[1]), subgen(dag[2]))
+		elif op in ('signext', 'zeroext'):
+			return (op, dag[1], subgen(dag[2]))
+		elif op == 'pc':
+			return ['pc']
+		elif op in ('hi', 'lo'):
+			return ['state.' + op]
+		elif op == 'pcd':
+			return [('+', 'pc', 4)] # Return the delay slot position
+		elif op == 'gpr':
+			return ('index', 'state.regs', subgen(dag[1]))
+		elif op == 'copreg':
+			return ('state.copreg', subgen(dag[1]), subgen(dag[2]))
+		elif op == 'copcreg':
+			return ('state.copcreg', subgen(dag[1]), subgen(dag[2]))
+		elif op == 'block':
+			return list(map(subgen, dag[1:]))
+		elif op == 'unsigned':
+			return ('>>>', subgen(dag[1]), 0)
+		elif op == 'signed':
+			return ('|', subgen(dag[1]), 0)
+		elif op == 'overflow':
+			return [('overflow', subgen(dag[1]))]
+		elif op == 'raise':
+			return [('emit', ('state.raise', dag[1]))]
+		elif op == 'break':
+			return [('emit', ('state.break_', dag[1]))]
+		elif op == 'syscall':
+			return [('emit', ('state.syscall', dag[1]))]
+		elif op == 'branch':
+			return [('emit', ('state.branch', subgen(dag[1])))]
+		elif op == 'load':
+			return [('state.mem.uint%i' % dag[1], subgen(dag[2]))]
+		elif op == 'store':
+			return [('emit', ('state.mem.uint%i' % dag[1], subgen(dag[2]), subgen(dag[3])))]
+		elif op == 'copfun':
+			return [('emit', ('state.copfun', subgen(dag[1]), subgen(dag[2])))]
+		else:
+			print 'Unknown op:', op
+			return []
+
+	code += cleansexp(subgen(dag))
+	code.append(('return', 'true'))
+
+	return code
+
 def build():
 	print 'Rebuilding from tables'
 	with file('scripts/disasm.js', 'w') as fp:
@@ -356,6 +454,9 @@ def build():
 	with file('scripts/interp.js', 'w') as fp:
 		print >>fp, '/* Autogenerated from insts.td. DO NOT EDIT */'
 		print >>fp, 'function interpret(pc, inst, state) {%s\treturn false;\n}' % indent(output(generate(genInterp)))
+	with file('scripts/decomp.js', 'w') as fp:
+		print >>fp, '/* Autogenerated from insts.td. DO NOT EDIT */'
+		print >>fp, 'function decompile(pc, inst, emit) {%s\treturn false;\n}' % indent(output(generate(genDecomp)))
 
 if __name__=='__main__':
 	build()

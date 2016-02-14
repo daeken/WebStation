@@ -37,6 +37,7 @@ def store : DagOp;
 def block : DagOp;
 def if : DagOp;
 def let : DagOp;
+def rlet: DagOp;
 def set : DagOp;
 def when : DagOp;
 def unsigned : DagOp;
@@ -328,13 +329,13 @@ def MTLO : RType<0b010011, "mtlo %$rd",
 >;
 
 def MULT : RType<0b011000, "mult %$rs, %$rt", 
-	(let $_t, (mul (gpr $rs), (gpr $rt)), 
+	(rlet $_t, (mul (gpr $rs), (gpr $rt)), 
 		(set (lo), (and $_t, 0xFFFFFFFF)), 
 		(set (hi), (shrl $_t, 32)))
 >;
 
 def MULTU : RType<0b011001, "multu %$rs, %$rt", 
-	(let $_t, (mul (unsigned (gpr $rs)), (unsigned (gpr $rt))), 
+	(rlet $_t, (mul (unsigned (gpr $rs)), (unsigned (gpr $rt))), 
 		(set (lo), (and $_t, 0xFFFFFFFF)), 
 		(set (hi), (shrl $_t, 32)))
 >;
