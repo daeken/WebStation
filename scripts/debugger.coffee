@@ -50,7 +50,8 @@ class Debugger
 		@exprs = {}
 		@exprid = 0
 		@center = @cpu.pc
-		@update()
+		@updating = false
+		@update true
 
 		@logbranches = false
 
@@ -59,11 +60,11 @@ class Debugger
 			@ttybuf = ''
 			@cpu.reset()
 			@center = @cpu.pc
-			@update()
+			@update true
 
 		$('#go-stop').click =>
 			@running = not @running
-			@update()
+			@update true
 			if @running
 				@start()
 
@@ -71,7 +72,7 @@ class Debugger
 			return if @running
 			ret = @run_one()
 			@center = if @cpu.delay == null then @cpu.pc else @cpu.delay
-			@update()
+			@update true
 			throw ret if ret != null
 
 		$('#add-bp').click =>
@@ -116,14 +117,17 @@ class Debugger
 		$('#up').click =>
 			return if @running
 			@center -= 0x10
-			@update()
+			@update true
 
 		$('#down').click =>
 			@center += 0x10
-			@update()
+			@update true
 
 		$('#log-branches').change =>
 			@logbranches = $('#log-branches').is(':checked')
+
+		$('#update-debug').change =>
+			@updating = $('#update-debug').is(':checked')
 
 	branch: (from, to) ->
 		phex32 'Branch from', from, 'to', to if @logbranches
@@ -175,13 +179,16 @@ class Debugger
 				console.old_log e
 				throw e
 
-	update: ->
+	update: (first=false) ->
 		@logel.scrollTop = @logel.scrollHeight
 
 		if @running
 			$('#go-stop').text 'Break'
 		else
 			$('#go-stop').text 'Continue'
+
+		if not @updating and not first
+			return
 
 		for i in [0...32]
 			$('#r' + i).text hexify(@cpu.regs[i] >>> 0, 8)
