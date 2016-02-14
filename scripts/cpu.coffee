@@ -23,8 +23,24 @@ class Cpu
 			0, 0, 0, 0, 0, 0, 0, 0
 		]
 
-		@last_block_pc = -1
-		@last_block_func = null
+		@code_cache = {}
+		@invalidation = []
+		for i in [0...16384]
+			@invalidation.push undefined
+
+	add_block: (addr, func) ->
+		@code_cache[addr] = func
+		page = (addr & 0x3fffffff) >>> 12
+		if not @invalidation[page]
+			@invalidation[page] = []
+		@invalidation[page].push addr
+
+	invalidate: (addr) ->
+		page = (addr & 0x3fffffff) >>> 12
+		if @invalidation[page]
+			for elem in @invalidation[page]
+				delete @code_cache[elem]
+			@invalidation[page] = undefined
 
 	execute_one: ->
 		@inscount++
@@ -38,13 +54,11 @@ class Cpu
 		
 		@pc += 4 if @delayed == null
 
-	decompile_block: (pc) ->
-		if @last_block_pc == pc
-			return [true, pc, @last_block_func]
+	decompile_block: (ipc) ->
+		if @code_cache[ipc]
+			return @code_cache[ipc]
 
-		#phex32 'Decompile block:', pc
-
-		@last_block_pc = pc
+		pc = ipc
 		code = ''
 		emit = (snippet) -> code += snippet + '\n'
 		branched = false
@@ -52,19 +66,19 @@ class Cpu
 		while true
 			inst = @mem.uint32 pc
 			if not decompile pc, inst, emit, branch
-				return [false, pc]
+				return false
 			pc += 4
 			if branched
 				inst = @mem.uint32 pc
 				if not decompile pc, inst, emit, branch
-					return [false, pc]
+					return false
 				pc += 4
 				break
 
 		total = '(function(state) {\nstate.delayed = null;\nstate.branch_to = null;\n' + code + '\nif(state.branch_to != null) state.pc = state.branch_to;\n})'
 		func = eval(total)
-		@last_block_func = func
-		[true, pc, func]
+		@code_cache[ipc] = func
+		func
 
 	branch: (pc, recompiled=false) ->
 		if recompiled

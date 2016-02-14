@@ -358,16 +358,19 @@ class Memory
 			throw 'Fail'
 
 	uint8: (addr, val=null) ->
+		@cpu.invalidate addr if val != null
 		return if @isolate and val != null
 		[buf, offset] = @phys2buf @virt2phys(addr, val != null)
 		buf.uint8 offset, val
 
 	uint16: (addr, val=null) ->
+		@cpu.invalidate addr if val != null
 		return if @isolate and val != null
 		[buf, offset] = @phys2buf @virt2phys(addr, val != null)
 		buf.uint16 offset, val
 
 	uint32: (addr, val=null) ->
+		@cpu.invalidate addr if val != null
 		return if @isolate and val != null
 		[buf, offset] = @phys2buf @virt2phys(addr, val != null)
 		buf.uint32 offset, val

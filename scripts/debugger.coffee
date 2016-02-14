@@ -141,7 +141,9 @@ class Debugger
 					console.log 'TTY:', line
 				@ttybuf = @ttybuf.substring pos + 1
 		if recompile
-			[success, pc, func] = @cpu.decompile_block cpc
+			func = @cpu.decompile_block cpc
+			if func == false
+				throw 'Failed compilation'
 			func @cpu
 		else
 			@cpu.execute_one()
