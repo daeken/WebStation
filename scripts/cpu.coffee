@@ -1,13 +1,3 @@
-faux_interpret = (pc, inst, state) ->
-	code = ''
-	emit = (snippet) -> code += snippet + '\n'
-	if not decompile(pc, inst, emit)
-		return false
-
-	func = eval('(function(state) { ' + code + '})')
-	func(state)
-	true
-
 class Cpu
 	constructor: (@bios) ->
 		@debugger = null
@@ -34,6 +24,7 @@ class Cpu
 		]
 
 	execute_one: ->
+		@decompiling = false
 		@inscount++
 		@delayed = @delay
 		cpc = if @delayed != null then @delay else @pc
@@ -45,10 +36,41 @@ class Cpu
 		
 		@pc += 4 if @delayed == null
 
-	branch: (pc) ->
-		@debugger.branch @pc, pc
-		@delay = @pc + 4
-		@pc = pc - 4 # Compensate for PC push
+	decompile_block: (pc) ->
+		@decompiling = true
+		total = ''
+		emit = (snippet) -> code += snippet + '\n'
+		branched = false
+		branch = -> branched = true
+		while true
+			code = ''
+			inst = @mem.uint32 pc
+			if not decompile pc, inst, emit, branch
+				return [false, pc + 4]
+			pc += 4
+			if branched
+				tcode = code
+				code = ''
+				inst = @mem.uint32 pc
+				if not decompile pc, inst, emit, branch
+					return [false, pc + 4]
+				pc += 4
+				total += code
+				total += tcode
+				break
+			else
+				total += code
+
+		func = eval('(function(state) { state.delayed = false;\n' + total + ' })')
+		[true, pc, func]
+
+	branch: (pc, recompiled=false) ->
+		if recompiled
+			@pc = pc
+		else
+			@debugger.branch @pc, pc if @debugger != null
+			@delay = @pc + 4
+			@pc = pc - 4 # Compensate for PC push
 
 	raise: (cause) ->
 		phex32 'Exception', cause, 'at', @pc

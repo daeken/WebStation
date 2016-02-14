@@ -2,15 +2,15 @@ $(document).ready ->
 	loadBlob 'bios.bin', (bios) ->
 		console.log 'Starting'
 		cpu = new Cpu bios
-		debug = new Debugger cpu
-		return
+		#debug = new Debugger cpu
+		blocks = []
 		iv = interval 1, ->
-			for i in [0...insns_per]
-				ret = cpu.execute_one()
-				break if ret != null
-
-			if ret != null
+			if blocks.indexOf(cpu.pc) == -1
+				phex32 'Block at', cpu.pc
+				blocks.push cpu.pc
+			[success, pc, func] = cpu.decompile_block cpu.pc
+			if not success
+				phex32 'Failed to decompile at', pc
 				clearInterval iv
-				console.log 'Executed', cpu.inscount, 'instructions'
-				phex32 'PC=', cpu.pc
-				throw ret
+				return
+			func cpu

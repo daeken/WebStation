@@ -293,7 +293,7 @@ def LHU : IType<0b100101, "lhu %$rt, $offset(%$rs)",
 >;
 
 def LUI : IType<0b001111, "lui %$rt, $imm", 
-	(set (gpr $rt), (unsigned (shl $imm, 16)))
+	(set (gpr $rt), (shl $imm, 16))
 >;
 
 def LW : IType<0b100011, "lw %$rt, $offset(%$rs)", 
