@@ -6,7 +6,7 @@ While WebStation can be built for offline runs (as it's purely client-side), you
 Dependencies
 ------------
 
-	pip install coffeescript flask
+	pip install coffeescript flask PyTableGen
 
 BIOS
 ----
