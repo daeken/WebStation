@@ -23,8 +23,10 @@ class Cpu
 			0, 0, 0, 0, 0, 0, 0, 0
 		]
 
+		@last_block_pc = -1
+		@last_block_func = null
+
 	execute_one: ->
-		@decompiling = false
 		@inscount++
 		@delayed = @delay
 		cpc = if @delayed != null then @delay else @pc
@@ -37,7 +39,10 @@ class Cpu
 		@pc += 4 if @delayed == null
 
 	decompile_block: (pc) ->
-		@decompiling = true
+		if @last_block_pc == pc
+			return [true, pc, @last_block_func]
+
+		@last_block_pc = pc
 		total = ''
 		emit = (snippet) -> code += snippet + '\n'
 		branched = false
@@ -62,6 +67,7 @@ class Cpu
 				total += code
 
 		func = eval('(function(state) { state.delayed = false;\n' + total + ' })')
+		@last_block_func = func
 		[true, pc, func]
 
 	branch: (pc, recompiled=false) ->
