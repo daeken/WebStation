@@ -12,7 +12,7 @@ chr = (x) ->
 	else
 		String.fromCharCode x
 
-insns_per = 100000
+insns_per = 10000
 bptypes = ['Execute']
 
 build_expr = (expr) ->
@@ -139,7 +139,9 @@ class Debugger
 				if line != ''
 					console.log 'TTY:', line
 				@ttybuf = @ttybuf.substring pos + 1
-		@cpu.execute_one()
+		#@cpu.execute_one()
+		[success, pc, func] = @cpu.decompile_block cpc
+		func @cpu
 
 	start: ->
 		return if @iv != null

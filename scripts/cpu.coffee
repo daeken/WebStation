@@ -31,7 +31,7 @@ class Cpu
 		@delayed = @delay
 		cpc = if @delayed != null then @delay else @pc
 		@delay = null
-		if faux_interpret(cpc, @mem.uint32(cpc), @) == false
+		if interpret(cpc, @mem.uint32(cpc), @) == false
 			inst = @mem.uint32 cpc
 			phex32 cpc, inst, disassemble(cpc, inst)
 			throw 'Unknown instruction'
