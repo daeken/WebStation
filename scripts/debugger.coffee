@@ -70,10 +70,18 @@ class Debugger
 
 		$('#step').click =>
 			return if @running
-			ret = @run_one()
-			@center = if @cpu.delay == null then @cpu.pc else @cpu.delay
-			@update true
-			throw ret if ret != null
+			e = null
+			try
+				@run_one()
+			catch e
+
+			finally
+				@center = if @cpu.delay == null then @cpu.pc else @cpu.delay
+				@update true
+			if e != null
+				if e instanceof Exception
+					return
+				throw e
 
 		$('#add-bp').click =>
 			return if $('#new-bp-addr').val() == ''
