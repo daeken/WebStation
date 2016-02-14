@@ -8,6 +8,8 @@ Dependencies
 
 	pip install coffeescript flask PyTableGen
 
+Flask is only needed if you plan to run the development server.
+
 BIOS
 ----
 
@@ -25,7 +27,11 @@ Then just browse to [http://localhost:23109](http://localhost:23109)
 Running (Static)
 ----------------
 
-The `build/` directory contains a runnable instance of the application.  Because of the way files are requested, this must be run from http.  E.g. `python -m SimpleHTTPServer someporthere`.
+To build a static, offline version (which still needs to be hosted on HTTP due to file access security), run:
+
+	python build.py
+
+The `build/` directory then contains a runnable instance of the application.  For quick testing, `python -m SimpleHTTPServer someporthere` to run a local webserver.  But you probably want to just run the actual dev server.
 
 License
 =======
