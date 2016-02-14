@@ -18,7 +18,7 @@ Running
 
 	python serve.py
 
-Then just browse to http://localhost:23109
+Then just browse to [http://localhost:23109](http://localhost:23109)
 
 License
 =======
