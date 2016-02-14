@@ -1,3 +1,13 @@
+faux_interpret = (pc, inst, state) ->
+	code = ''
+	emit = (snippet) -> code += snippet + '\n'
+	if not decompile(pc, inst, emit)
+		return false
+
+	func = eval('(function(state) { ' + code + '})')
+	func(state)
+	true
+
 class Cpu
 	constructor: (@bios) ->
 		@debugger = null
@@ -28,7 +38,7 @@ class Cpu
 		@delayed = @delay
 		cpc = if @delayed != null then @delay else @pc
 		@delay = null
-		if interpret(cpc, @mem.uint32(cpc), @) == false
+		if faux_interpret(cpc, @mem.uint32(cpc), @) == false
 			inst = @mem.uint32 cpc
 			phex32 cpc, inst, disassemble(cpc, inst)
 			throw 'Unknown instruction'
