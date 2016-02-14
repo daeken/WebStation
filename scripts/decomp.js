@@ -5,267 +5,267 @@ function decompile($pc, inst, emit, branch) {
 			switch((inst) & (0x3f)) {
 				case 0x0: {
 					/* SLL */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = (((state.regs)[0x" + hexify($rt) + "]) << (0x" + hexify($shamt) + ")) >>> (0x0);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = (((state.regs)[" + $rt + "]) << (" + $shamt + ")) >>> (0x0);"); }
 					return(true);
 					break;
 				}
 				case 0x2: {
 					/* SRL */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = ((state.regs)[0x" + hexify($rt) + "]) >>> (0x" + hexify($shamt) + ");"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = ((state.regs)[" + $rt + "]) >>> (" + $shamt + ");"); }
 					return(true);
 					break;
 				}
 				case 0x3: {
 					/* SRA */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
 					$shamt = ((inst) >>> (0x6)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = ((state.regs)[0x" + hexify($rt) + "]) >> (0x" + hexify($shamt) + ");"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = ((state.regs)[" + $rt + "]) >> (" + $shamt + ");"); }
 					return(true);
 					break;
 				}
 				case 0x4: {
 					/* SLLV */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = (((state.regs)[0x" + hexify($rt) + "]) << ((state.regs)[0x" + hexify($rs) + "])) >>> (0x0);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = (((state.regs)[" + $rt + "]) << ((state.regs)[" + $rs + "])) >>> (0x0);"); }
 					return(true);
 					break;
 				}
 				case 0x6: {
 					/* SRLV */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = ((state.regs)[0x" + hexify($rt) + "]) >>> ((state.regs)[0x" + hexify($rs) + "]);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = ((state.regs)[" + $rt + "]) >>> ((state.regs)[" + $rs + "]);"); }
 					return(true);
 					break;
 				}
 				case 0x7: {
 					/* SRAV */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = ((state.regs)[0x" + hexify($rt) + "]) >> ((state.regs)[0x" + hexify($rs) + "]);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = ((state.regs)[" + $rt + "]) >> ((state.regs)[" + $rs + "]);"); }
 					return(true);
 					break;
 				}
 				case 0x8: {
 					/* JR */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
-					emit("state.branch(((state.regs)[0x" + hexify($rs) + "]) >>> (0x0), true);");
+					emit("state.branch(((state.regs)[" + $rs + "]) >>> (0x0), true);");
 					branch();
 					return(true);
 					break;
 				}
 				case 0x9: {
 					/* JALR */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = ((0x" + hexify($pc) + ") + (0x4)) + (0x4);"); }
-					emit("state.branch(((state.regs)[0x" + hexify($rs) + "]) >>> (0x0), true);");
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = ((" + $pc + ") + (0x4)) + (0x4);"); }
+					emit("state.branch(((state.regs)[" + $rs + "]) >>> (0x0), true);");
 					branch();
 					return(true);
 					break;
 				}
 				case 0xc: {
 					/* SYSCALL */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$code = ((inst) >>> (0x6)) & (0xfffff);
-					emit("state.syscall(0x" + hexify($code) + ");");
+					emit("state.syscall(" + $code + ");");
 					return(true);
 					break;
 				}
 				case 0xd: {
 					/* BREAK */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$code = ((inst) >>> (0x6)) & (0xfffff);
-					emit("state.break_(0x" + hexify($code) + ");");
+					emit("state.break_(" + $code + ");");
 					return(true);
 					break;
 				}
 				case 0x10: {
 					/* MFHI */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = state.hi;"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = state.hi;"); }
 					return(true);
 					break;
 				}
 				case 0x11: {
 					/* MTHI */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.hi = (state.regs)[0x" + hexify($rd) + "];");
+					emit("state.hi = (state.regs)[" + $rd + "];");
 					return(true);
 					break;
 				}
 				case 0x12: {
 					/* MFLO */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = state.lo;"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = state.lo;"); }
 					return(true);
 					break;
 				}
 				case 0x13: {
 					/* MTLO */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.lo = (state.regs)[0x" + hexify($rd) + "];");
+					emit("state.lo = (state.regs)[" + $rd + "];");
 					return(true);
 					break;
 				}
 				case 0x18: {
 					/* MULT */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
-					emit("$_t = ((state.regs)[0x" + hexify($rs) + "]) * ((state.regs)[0x" + hexify($rt) + "]);\nstate.lo = (($_t) & (0xffffffff)) >>> (0x0);\nstate.hi = ($_t) >>> (0x20);");
+					emit("$_t = ((state.regs)[" + $rs + "]) * ((state.regs)[" + $rt + "]);\nstate.lo = (($_t) & (0xffffffff)) >>> (0x0);\nstate.hi = ($_t) >>> (0x20);");
 					return(true);
 					break;
 				}
 				case 0x19: {
 					/* MULTU */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
-					emit("$_t = (((state.regs)[0x" + hexify($rs) + "]) >>> (0x0)) * (((state.regs)[0x" + hexify($rt) + "]) >>> (0x0));\nstate.lo = (($_t) & (0xffffffff)) >>> (0x0);\nstate.hi = ($_t) >>> (0x20);");
+					emit("$_t = (((state.regs)[" + $rs + "]) >>> (0x0)) * (((state.regs)[" + $rt + "]) >>> (0x0));\nstate.lo = (($_t) & (0xffffffff)) >>> (0x0);\nstate.hi = ($_t) >>> (0x20);");
 					return(true);
 					break;
 				}
 				case 0x1a: {
 					/* DIV */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
-					emit("state.lo = (((state.regs)[0x" + hexify($rs) + "]) / ((state.regs)[0x" + hexify($rt) + "])) >>> (0x0);");
-					emit("state.hi = (((state.regs)[0x" + hexify($rs) + "]) % ((state.regs)[0x" + hexify($rt) + "])) >>> (0x0);");
+					emit("state.lo = (((state.regs)[" + $rs + "]) / ((state.regs)[" + $rt + "])) >>> (0x0);");
+					emit("state.hi = (((state.regs)[" + $rs + "]) % ((state.regs)[" + $rt + "])) >>> (0x0);");
 					return(true);
 					break;
 				}
 				case 0x1b: {
 					/* DIVU */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
-					emit("state.lo = ((((state.regs)[0x" + hexify($rs) + "]) >>> (0x0)) / (((state.regs)[0x" + hexify($rt) + "]) >>> (0x0))) >>> (0x0);");
-					emit("state.hi = ((((state.regs)[0x" + hexify($rs) + "]) >>> (0x0)) % (((state.regs)[0x" + hexify($rt) + "]) >>> (0x0))) >>> (0x0);");
+					emit("state.lo = ((((state.regs)[" + $rs + "]) >>> (0x0)) / (((state.regs)[" + $rt + "]) >>> (0x0))) >>> (0x0);");
+					emit("state.hi = ((((state.regs)[" + $rs + "]) >>> (0x0)) % (((state.regs)[" + $rt + "]) >>> (0x0))) >>> (0x0);");
 					return(true);
 					break;
 				}
 				case 0x20: {
 					/* ADD */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("if(overflow(((state.regs)[0x" + hexify($rs) + "]) + ((state.regs)[0x" + hexify($rt) + "]))) {\n	state.raise(ArithmeticOverflow)\n} else {\n	if((0x" + hexify($rd) + ") != (0x0)) { (state.regs)[0x" + hexify($rd) + "] = ((state.regs)[0x" + hexify($rs) + "]) + ((state.regs)[0x" + hexify($rt) + "]); }\n}");
+					emit("if(overflow(((state.regs)[" + $rs + "]) + ((state.regs)[" + $rt + "]))) {\n	state.raise(ArithmeticOverflow)\n} else {\n	if((" + $rd + ") != (0x0)) { (state.regs)[" + $rd + "] = ((state.regs)[" + $rs + "]) + ((state.regs)[" + $rt + "]); }\n}");
 					return(true);
 					break;
 				}
 				case 0x21: {
 					/* ADDU */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = ((state.regs)[0x" + hexify($rs) + "]) + ((state.regs)[0x" + hexify($rt) + "]);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = ((state.regs)[" + $rs + "]) + ((state.regs)[" + $rt + "]);"); }
 					return(true);
 					break;
 				}
 				case 0x22: {
 					/* SUB */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("if(overflow(((state.regs)[0x" + hexify($rs) + "]) - ((state.regs)[0x" + hexify($rt) + "]))) {\n	state.raise(ArithmeticOverflow)\n} else {\n	if((0x" + hexify($rd) + ") != (0x0)) { (state.regs)[0x" + hexify($rd) + "] = ((state.regs)[0x" + hexify($rs) + "]) - ((state.regs)[0x" + hexify($rt) + "]); }\n}");
+					emit("if(overflow(((state.regs)[" + $rs + "]) - ((state.regs)[" + $rt + "]))) {\n	state.raise(ArithmeticOverflow)\n} else {\n	if((" + $rd + ") != (0x0)) { (state.regs)[" + $rd + "] = ((state.regs)[" + $rs + "]) - ((state.regs)[" + $rt + "]); }\n}");
 					return(true);
 					break;
 				}
 				case 0x23: {
 					/* SUBU */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = ((state.regs)[0x" + hexify($rs) + "]) - ((state.regs)[0x" + hexify($rt) + "]);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = ((state.regs)[" + $rs + "]) - ((state.regs)[" + $rt + "]);"); }
 					return(true);
 					break;
 				}
 				case 0x24: {
 					/* AND */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = (((state.regs)[0x" + hexify($rs) + "]) & ((state.regs)[0x" + hexify($rt) + "])) >>> (0x0);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = (((state.regs)[" + $rs + "]) & ((state.regs)[" + $rt + "])) >>> (0x0);"); }
 					return(true);
 					break;
 				}
 				case 0x25: {
 					/* OR */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = (((state.regs)[0x" + hexify($rs) + "]) | ((state.regs)[0x" + hexify($rt) + "])) >>> (0x0);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = (((state.regs)[" + $rs + "]) | ((state.regs)[" + $rt + "])) >>> (0x0);"); }
 					return(true);
 					break;
 				}
 				case 0x26: {
 					/* XOR */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = (((state.regs)[0x" + hexify($rs) + "]) ^ ((state.regs)[0x" + hexify($rt) + "])) >>> (0x0);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = (((state.regs)[" + $rs + "]) ^ ((state.regs)[" + $rt + "])) >>> (0x0);"); }
 					return(true);
 					break;
 				}
 				case 0x27: {
 					/* NOR */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rd) != (0x0)) { emit("(state.regs)[0x" + hexify($rd) + "] = (~(((state.regs)[0x" + hexify($rs) + "]) | ((state.regs)[0x" + hexify($rt) + "]))) >>> (0x0);"); }
+					if(($rd) != (0x0)) { emit("(state.regs)[" + $rd + "] = (~(((state.regs)[" + $rs + "]) | ((state.regs)[" + $rt + "]))) >>> (0x0);"); }
 					return(true);
 					break;
 				}
 				case 0x2a: {
 					/* SLT */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("if((((state.regs)[0x" + hexify($rs) + "]) | (0x0)) < (((state.regs)[0x" + hexify($rt) + "]) | (0x0))) {\n	if((0x" + hexify($rd) + ") != (0x0)) { (state.regs)[0x" + hexify($rd) + "] = 0x1; }\n} else {\n	if((0x" + hexify($rd) + ") != (0x0)) { (state.regs)[0x" + hexify($rd) + "] = 0x0; }\n}");
+					emit("if((((state.regs)[" + $rs + "]) | (0x0)) < (((state.regs)[" + $rt + "]) | (0x0))) {\n	if((" + $rd + ") != (0x0)) { (state.regs)[" + $rd + "] = 0x1; }\n} else {\n	if((" + $rd + ") != (0x0)) { (state.regs)[" + $rd + "] = 0x0; }\n}");
 					return(true);
 					break;
 				}
 				case 0x2b: {
 					/* SLTU */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("if((((state.regs)[0x" + hexify($rs) + "]) >>> (0x0)) < (((state.regs)[0x" + hexify($rt) + "]) >>> (0x0))) {\n	if((0x" + hexify($rd) + ") != (0x0)) { (state.regs)[0x" + hexify($rd) + "] = 0x1; }\n} else {\n	if((0x" + hexify($rd) + ") != (0x0)) { (state.regs)[0x" + hexify($rd) + "] = 0x0; }\n}");
+					emit("if((((state.regs)[" + $rs + "]) >>> (0x0)) < (((state.regs)[" + $rt + "]) >>> (0x0))) {\n	if((" + $rd + ") != (0x0)) { (state.regs)[" + $rd + "] = 0x1; }\n} else {\n	if((" + $rd + ") != (0x0)) { (state.regs)[" + $rd + "] = 0x0; }\n}");
 					return(true);
 					break;
 				}
@@ -276,46 +276,46 @@ function decompile($pc, inst, emit, branch) {
 			switch(((inst) >>> (0x10)) & (0x1f)) {
 				case 0x0: {
 					/* BLTZ */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$imm = (inst) & (0xffff);
 					$target = (($pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					emit("if((((state.regs)[0x" + hexify($rs) + "]) | (0x0)) < (0x0)) { state.branch(0x" + hexify($target) + ", true) }");
+					emit("if((((state.regs)[" + $rs + "]) | (0x0)) < (0x0)) { state.branch(" + $target + ", true) }");
 					branch();
 					return(true);
 					break;
 				}
 				case 0x1: {
 					/* BGEZ */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$imm = (inst) & (0xffff);
 					$target = (($pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					emit("if((((state.regs)[0x" + hexify($rs) + "]) | (0x0)) >= (0x0)) { state.branch(0x" + hexify($target) + ", true) }");
+					emit("if((((state.regs)[" + $rs + "]) | (0x0)) >= (0x0)) { state.branch(" + $target + ", true) }");
 					branch();
 					return(true);
 					break;
 				}
 				case 0x10: {
 					/* BLTZAL */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$imm = (inst) & (0xffff);
-					if((0x1f) != (0x0)) { emit("(state.regs)[0x1f] = (0x" + hexify($pc) + ") + (0x4);"); }
+					if((0x1f) != (0x0)) { emit("(state.regs)[0x1f] = (" + $pc + ") + (0x4);"); }
 					$target = (($pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					emit("if((((state.regs)[0x" + hexify($rs) + "]) | (0x0)) < (0x0)) { state.branch(0x" + hexify($target) + ", true) }");
+					emit("if((((state.regs)[" + $rs + "]) | (0x0)) < (0x0)) { state.branch(" + $target + ", true) }");
 					branch();
 					return(true);
 					break;
 				}
 				case 0x11: {
 					/* BGEZAL */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$imm = (inst) & (0xffff);
-					if((0x1f) != (0x0)) { emit("(state.regs)[0x1f] = (0x" + hexify($pc) + ") + (0x4);"); }
+					if((0x1f) != (0x0)) { emit("(state.regs)[0x1f] = (" + $pc + ") + (0x4);"); }
 					$target = (($pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					emit("if((((state.regs)[0x" + hexify($rs) + "]) | (0x0)) >= (0x0)) { state.branch(0x" + hexify($target) + ", true) }");
+					emit("if((((state.regs)[" + $rs + "]) | (0x0)) >= (0x0)) { state.branch(" + $target + ", true) }");
 					branch();
 					return(true);
 					break;
@@ -325,45 +325,45 @@ function decompile($pc, inst, emit, branch) {
 		}
 		case 0x2: {
 			/* J */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$imm = (inst) & (0x3ffffff);
 			$target = (((($pc) + (0x4)) & (0xf0000000)) >>> (0x0)) + (zeroext(0x1c, (($imm) << (0x2)) >>> (0x0)));
-			emit("state.branch(0x" + hexify($target) + ", true);");
+			emit("state.branch(" + $target + ", true);");
 			branch();
 			return(true);
 			break;
 		}
 		case 0x3: {
 			/* JAL */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$imm = (inst) & (0x3ffffff);
-			if((0x1f) != (0x0)) { emit("(state.regs)[0x1f] = ((0x" + hexify($pc) + ") + (0x4)) + (0x4);"); }
+			if((0x1f) != (0x0)) { emit("(state.regs)[0x1f] = ((" + $pc + ") + (0x4)) + (0x4);"); }
 			$target = (((($pc) + (0x4)) & (0xf0000000)) >>> (0x0)) + (zeroext(0x1c, (($imm) << (0x2)) >>> (0x0)));
-			emit("state.branch(0x" + hexify($target) + ", true);");
+			emit("state.branch(" + $target + ", true);");
 			branch();
 			return(true);
 			break;
 		}
 		case 0x4: {
 			/* BEQ */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$target = (($pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-			emit("if((((state.regs)[0x" + hexify($rs) + "]) >>> (0x0)) == (((state.regs)[0x" + hexify($rt) + "]) >>> (0x0))) { state.branch(0x" + hexify($target) + ", true) }");
+			emit("if((((state.regs)[" + $rs + "]) >>> (0x0)) == (((state.regs)[" + $rt + "]) >>> (0x0))) { state.branch(" + $target + ", true) }");
 			branch();
 			return(true);
 			break;
 		}
 		case 0x5: {
 			/* BNE */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$target = (($pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-			emit("if(((state.regs)[0x" + hexify($rs) + "]) != ((state.regs)[0x" + hexify($rt) + "])) { state.branch(0x" + hexify($target) + ", true) }");
+			emit("if(((state.regs)[" + $rs + "]) != ((state.regs)[" + $rt + "])) { state.branch(" + $target + ", true) }");
 			branch();
 			return(true);
 			break;
@@ -372,11 +372,11 @@ function decompile($pc, inst, emit, branch) {
 			switch(((inst) >>> (0x10)) & (0x1f)) {
 				case 0x0: {
 					/* BLEZ */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$imm = (inst) & (0xffff);
 					$target = (($pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					emit("if((((state.regs)[0x" + hexify($rs) + "]) | (0x0)) <= (0x0)) { state.branch(0x" + hexify($target) + ", true) }");
+					emit("if((((state.regs)[" + $rs + "]) | (0x0)) <= (0x0)) { state.branch(" + $target + ", true) }");
 					branch();
 					return(true);
 					break;
@@ -388,11 +388,11 @@ function decompile($pc, inst, emit, branch) {
 			switch(((inst) >>> (0x10)) & (0x1f)) {
 				case 0x0: {
 					/* BGTZ */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$rs = ((inst) >>> (0x15)) & (0x1f);
 					$imm = (inst) & (0xffff);
 					$target = (($pc) + (0x4)) + (signext(0x12, (($imm) << (0x2)) >>> (0x0)));
-					emit("if((((state.regs)[0x" + hexify($rs) + "]) | (0x0)) > (0x0)) { state.branch(0x" + hexify($target) + ", true) }");
+					emit("if((((state.regs)[" + $rs + "]) | (0x0)) > (0x0)) { state.branch(" + $target + ", true) }");
 					branch();
 					return(true);
 					break;
@@ -402,87 +402,87 @@ function decompile($pc, inst, emit, branch) {
 		}
 		case 0x8: {
 			/* ADDI */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$eimm = signext(0x10, $imm);
-			emit("if(overflow(((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($eimm) + "))) {\n	state.raise(ArithmeticOverflow)\n} else {\n	if((0x" + hexify($rt) + ") != (0x0)) { (state.regs)[0x" + hexify($rt) + "] = ((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($eimm) + "); }\n}");
+			emit("if(overflow(((state.regs)[" + $rs + "]) + (" + $eimm + "))) {\n	state.raise(ArithmeticOverflow)\n} else {\n	if((" + $rt + ") != (0x0)) { (state.regs)[" + $rt + "] = ((state.regs)[" + $rs + "]) + (" + $eimm + "); }\n}");
 			return(true);
 			break;
 		}
 		case 0x9: {
 			/* ADDIU */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$eimm = signext(0x10, $imm);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = ((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($eimm) + ");"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = ((state.regs)[" + $rs + "]) + (" + $eimm + ");"); }
 			return(true);
 			break;
 		}
 		case 0xa: {
 			/* SLTI */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$eimm = signext(0x10, $imm);
-			emit("if((((state.regs)[0x" + hexify($rs) + "]) | (0x0)) < (0x" + hexify($eimm) + ")) {\n	if((0x" + hexify($rt) + ") != (0x0)) { (state.regs)[0x" + hexify($rt) + "] = 0x1; }\n} else {\n	if((0x" + hexify($rt) + ") != (0x0)) { (state.regs)[0x" + hexify($rt) + "] = 0x0; }\n}");
+			emit("if((((state.regs)[" + $rs + "]) | (0x0)) < (" + $eimm + ")) {\n	if((" + $rt + ") != (0x0)) { (state.regs)[" + $rt + "] = 0x1; }\n} else {\n	if((" + $rt + ") != (0x0)) { (state.regs)[" + $rt + "] = 0x0; }\n}");
 			return(true);
 			break;
 		}
 		case 0xb: {
 			/* SLTIU */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$eimm = (signext(0x10, $imm)) >>> (0x0);
-			emit("if((((state.regs)[0x" + hexify($rs) + "]) >>> (0x0)) < (0x" + hexify($eimm) + ")) {\n	if((0x" + hexify($rt) + ") != (0x0)) { (state.regs)[0x" + hexify($rt) + "] = 0x1; }\n} else {\n	if((0x" + hexify($rt) + ") != (0x0)) { (state.regs)[0x" + hexify($rt) + "] = 0x0; }\n}");
+			emit("if((((state.regs)[" + $rs + "]) >>> (0x0)) < (" + $eimm + ")) {\n	if((" + $rt + ") != (0x0)) { (state.regs)[" + $rt + "] = 0x1; }\n} else {\n	if((" + $rt + ") != (0x0)) { (state.regs)[" + $rt + "] = 0x0; }\n}");
 			return(true);
 			break;
 		}
 		case 0xc: {
 			/* ANDI */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$eimm = zeroext(0x10, $imm);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = (((state.regs)[0x" + hexify($rs) + "]) & (0x" + hexify($eimm) + ")) >>> (0x0);"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = (((state.regs)[" + $rs + "]) & (" + $eimm + ")) >>> (0x0);"); }
 			return(true);
 			break;
 		}
 		case 0xd: {
 			/* ORI */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$eimm = zeroext(0x10, $imm);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = (((state.regs)[0x" + hexify($rs) + "]) | (0x" + hexify($eimm) + ")) >>> (0x0);"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = (((state.regs)[" + $rs + "]) | (" + $eimm + ")) >>> (0x0);"); }
 			return(true);
 			break;
 		}
 		case 0xe: {
 			/* XORI */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$eimm = zeroext(0x10, $imm);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = (((state.regs)[0x" + hexify($rs) + "]) ^ (0x" + hexify($eimm) + ")) >>> (0x0);"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = (((state.regs)[" + $rs + "]) ^ (" + $eimm + ")) >>> (0x0);"); }
 			return(true);
 			break;
 		}
 		case 0xf: {
 			/* LUI */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = ((0x" + hexify($imm) + ") << (0x10)) >>> (0x0);"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = ((" + $imm + ") << (0x10)) >>> (0x0);"); }
 			return(true);
 			break;
 		}
@@ -490,185 +490,185 @@ function decompile($pc, inst, emit, branch) {
 			switch(((inst) >>> (0x15)) & (0x1f)) {
 				case 0x0: {
 					/* MFCzanonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = state.copreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ");"); }
+					if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = state.copreg(" + $cop + ", " + $rd + ");"); }
 					return(true);
 					break;
 				}
 				case 0x2: {
 					/* CFCzanonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = state.copcreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ");"); }
+					if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = state.copcreg(" + $cop + ", " + $rd + ");"); }
 					return(true);
 					break;
 				}
 				case 0x4: {
 					/* MTCzanonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.copreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ", (state.regs)[0x" + hexify($rt) + "]);");
+					emit("state.copreg(" + $cop + ", " + $rd + ", (state.regs)[" + $rt + "]);");
 					return(true);
 					break;
 				}
 				case 0x6: {
 					/* CTCzanonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.copcreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ", (state.regs)[0x" + hexify($rt) + "]);");
+					emit("state.copcreg(" + $cop + ", " + $rd + ", (state.regs)[" + $rt + "]);");
 					return(true);
 					break;
 				}
 				case 0x10: {
 					/* COPzanonymous_4anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x11: {
 					/* COPzanonymous_5anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x12: {
 					/* COPzanonymous_6anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x13: {
 					/* COPzanonymous_7anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x14: {
 					/* COPzanonymous_8anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x15: {
 					/* COPzanonymous_9anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x16: {
 					/* COPzanonymous_10anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x17: {
 					/* COPzanonymous_11anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x18: {
 					/* COPzanonymous_12anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x19: {
 					/* COPzanonymous_13anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1a: {
 					/* COPzanonymous_14anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1b: {
 					/* COPzanonymous_15anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1c: {
 					/* COPzanonymous_16anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1d: {
 					/* COPzanonymous_17anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1e: {
 					/* COPzanonymous_18anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1f: {
 					/* COPzanonymous_19anonymous_0 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
@@ -679,185 +679,185 @@ function decompile($pc, inst, emit, branch) {
 			switch(((inst) >>> (0x15)) & (0x1f)) {
 				case 0x0: {
 					/* MFCzanonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = state.copreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ");"); }
+					if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = state.copreg(" + $cop + ", " + $rd + ");"); }
 					return(true);
 					break;
 				}
 				case 0x2: {
 					/* CFCzanonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = state.copcreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ");"); }
+					if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = state.copcreg(" + $cop + ", " + $rd + ");"); }
 					return(true);
 					break;
 				}
 				case 0x4: {
 					/* MTCzanonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.copreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ", (state.regs)[0x" + hexify($rt) + "]);");
+					emit("state.copreg(" + $cop + ", " + $rd + ", (state.regs)[" + $rt + "]);");
 					return(true);
 					break;
 				}
 				case 0x6: {
 					/* CTCzanonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.copcreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ", (state.regs)[0x" + hexify($rt) + "]);");
+					emit("state.copcreg(" + $cop + ", " + $rd + ", (state.regs)[" + $rt + "]);");
 					return(true);
 					break;
 				}
 				case 0x10: {
 					/* COPzanonymous_4anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x11: {
 					/* COPzanonymous_5anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x12: {
 					/* COPzanonymous_6anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x13: {
 					/* COPzanonymous_7anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x14: {
 					/* COPzanonymous_8anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x15: {
 					/* COPzanonymous_9anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x16: {
 					/* COPzanonymous_10anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x17: {
 					/* COPzanonymous_11anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x18: {
 					/* COPzanonymous_12anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x19: {
 					/* COPzanonymous_13anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1a: {
 					/* COPzanonymous_14anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1b: {
 					/* COPzanonymous_15anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1c: {
 					/* COPzanonymous_16anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1d: {
 					/* COPzanonymous_17anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1e: {
 					/* COPzanonymous_18anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1f: {
 					/* COPzanonymous_19anonymous_1 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
@@ -868,185 +868,185 @@ function decompile($pc, inst, emit, branch) {
 			switch(((inst) >>> (0x15)) & (0x1f)) {
 				case 0x0: {
 					/* MFCzanonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = state.copreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ");"); }
+					if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = state.copreg(" + $cop + ", " + $rd + ");"); }
 					return(true);
 					break;
 				}
 				case 0x2: {
 					/* CFCzanonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = state.copcreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ");"); }
+					if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = state.copcreg(" + $cop + ", " + $rd + ");"); }
 					return(true);
 					break;
 				}
 				case 0x4: {
 					/* MTCzanonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.copreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ", (state.regs)[0x" + hexify($rt) + "]);");
+					emit("state.copreg(" + $cop + ", " + $rd + ", (state.regs)[" + $rt + "]);");
 					return(true);
 					break;
 				}
 				case 0x6: {
 					/* CTCzanonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.copcreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ", (state.regs)[0x" + hexify($rt) + "]);");
+					emit("state.copcreg(" + $cop + ", " + $rd + ", (state.regs)[" + $rt + "]);");
 					return(true);
 					break;
 				}
 				case 0x10: {
 					/* COPzanonymous_4anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x11: {
 					/* COPzanonymous_5anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x12: {
 					/* COPzanonymous_6anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x13: {
 					/* COPzanonymous_7anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x14: {
 					/* COPzanonymous_8anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x15: {
 					/* COPzanonymous_9anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x16: {
 					/* COPzanonymous_10anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x17: {
 					/* COPzanonymous_11anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x18: {
 					/* COPzanonymous_12anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x19: {
 					/* COPzanonymous_13anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1a: {
 					/* COPzanonymous_14anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1b: {
 					/* COPzanonymous_15anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1c: {
 					/* COPzanonymous_16anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1d: {
 					/* COPzanonymous_17anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1e: {
 					/* COPzanonymous_18anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1f: {
 					/* COPzanonymous_19anonymous_2 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
@@ -1057,185 +1057,185 @@ function decompile($pc, inst, emit, branch) {
 			switch(((inst) >>> (0x15)) & (0x1f)) {
 				case 0x0: {
 					/* MFCzanonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = state.copreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ");"); }
+					if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = state.copreg(" + $cop + ", " + $rd + ");"); }
 					return(true);
 					break;
 				}
 				case 0x2: {
 					/* CFCzanonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = state.copcreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ");"); }
+					if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = state.copcreg(" + $cop + ", " + $rd + ");"); }
 					return(true);
 					break;
 				}
 				case 0x4: {
 					/* MTCzanonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.copreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ", (state.regs)[0x" + hexify($rt) + "]);");
+					emit("state.copreg(" + $cop + ", " + $rd + ", (state.regs)[" + $rt + "]);");
 					return(true);
 					break;
 				}
 				case 0x6: {
 					/* CTCzanonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$rt = ((inst) >>> (0x10)) & (0x1f);
 					$rd = ((inst) >>> (0xb)) & (0x1f);
-					emit("state.copcreg(0x" + hexify($cop) + ", 0x" + hexify($rd) + ", (state.regs)[0x" + hexify($rt) + "]);");
+					emit("state.copcreg(" + $cop + ", " + $rd + ", (state.regs)[" + $rt + "]);");
 					return(true);
 					break;
 				}
 				case 0x10: {
 					/* COPzanonymous_4anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x11: {
 					/* COPzanonymous_5anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x12: {
 					/* COPzanonymous_6anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x13: {
 					/* COPzanonymous_7anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x14: {
 					/* COPzanonymous_8anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x15: {
 					/* COPzanonymous_9anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x16: {
 					/* COPzanonymous_10anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x17: {
 					/* COPzanonymous_11anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x18: {
 					/* COPzanonymous_12anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x19: {
 					/* COPzanonymous_13anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1a: {
 					/* COPzanonymous_14anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1b: {
 					/* COPzanonymous_15anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1c: {
 					/* COPzanonymous_16anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1d: {
 					/* COPzanonymous_17anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1e: {
 					/* COPzanonymous_18anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
 				case 0x1f: {
 					/* COPzanonymous_19anonymous_3 */
-					emit("state.pc = 0x" + hexify($pc) + ";");
+					emit("state.pc = " + $pc + ";");
 					$cop = ((inst) >>> (0x1a)) & (0x3);
 					$cofun = (inst) & (0x1ffffff);
-					emit("state.copfun(0x" + hexify($cop) + ", 0x" + hexify($cofun) + ");");
+					emit("state.copfun(" + $cop + ", " + $cofun + ");");
 					return(true);
 					break;
 				}
@@ -1244,89 +1244,89 @@ function decompile($pc, inst, emit, branch) {
 		}
 		case 0x20: {
 			/* LB */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$offset = signext(0x10, $imm);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = signext(0x8, state.mem.uint8((((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($offset) + ")) >>> (0x0)));"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = signext(0x8, state.mem.uint8((((state.regs)[" + $rs + "]) + (" + $offset + ")) >>> (0x0)));"); }
 			return(true);
 			break;
 		}
 		case 0x21: {
 			/* LH */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$offset = signext(0x10, $imm);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = signext(0x10, state.mem.uint16((((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($offset) + ")) >>> (0x0)));"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = signext(0x10, state.mem.uint16((((state.regs)[" + $rs + "]) + (" + $offset + ")) >>> (0x0)));"); }
 			return(true);
 			break;
 		}
 		case 0x23: {
 			/* LW */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$offset = signext(0x10, $imm);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = state.mem.uint32((((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($offset) + ")) >>> (0x0));"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = state.mem.uint32((((state.regs)[" + $rs + "]) + (" + $offset + ")) >>> (0x0));"); }
 			return(true);
 			break;
 		}
 		case 0x24: {
 			/* LBU */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$offset = signext(0x10, $imm);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = zeroext(0x8, state.mem.uint8((((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($offset) + ")) >>> (0x0)));"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = zeroext(0x8, state.mem.uint8((((state.regs)[" + $rs + "]) + (" + $offset + ")) >>> (0x0)));"); }
 			return(true);
 			break;
 		}
 		case 0x25: {
 			/* LHU */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$offset = signext(0x10, $imm);
-			if(($rt) != (0x0)) { emit("(state.regs)[0x" + hexify($rt) + "] = zeroext(0x10, state.mem.uint16(((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($offset) + ")));"); }
+			if(($rt) != (0x0)) { emit("(state.regs)[" + $rt + "] = zeroext(0x10, state.mem.uint16(((state.regs)[" + $rs + "]) + (" + $offset + ")));"); }
 			return(true);
 			break;
 		}
 		case 0x28: {
 			/* SB */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$offset = signext(0x10, $imm);
-			emit("state.mem.uint8((((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($offset) + ")) >>> (0x0), (state.regs)[0x" + hexify($rt) + "]);");
+			emit("state.mem.uint8((((state.regs)[" + $rs + "]) + (" + $offset + ")) >>> (0x0), (state.regs)[" + $rt + "]);");
 			return(true);
 			break;
 		}
 		case 0x29: {
 			/* SH */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$offset = signext(0x10, $imm);
-			emit("state.mem.uint16((((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($offset) + ")) >>> (0x0), (state.regs)[0x" + hexify($rt) + "]);");
+			emit("state.mem.uint16((((state.regs)[" + $rs + "]) + (" + $offset + ")) >>> (0x0), (state.regs)[" + $rt + "]);");
 			return(true);
 			break;
 		}
 		case 0x2b: {
 			/* SW */
-			emit("state.pc = 0x" + hexify($pc) + ";");
+			emit("state.pc = " + $pc + ";");
 			$rs = ((inst) >>> (0x15)) & (0x1f);
 			$rt = ((inst) >>> (0x10)) & (0x1f);
 			$imm = (inst) & (0xffff);
 			$offset = signext(0x10, $imm);
-			emit("state.mem.uint32((((state.regs)[0x" + hexify($rs) + "]) + (0x" + hexify($offset) + ")) >>> (0x0), (state.regs)[0x" + hexify($rt) + "]);");
+			emit("state.mem.uint32((((state.regs)[" + $rs + "]) + (" + $offset + ")) >>> (0x0), (state.regs)[" + $rt + "]);");
 			return(true);
 			break;
 		}

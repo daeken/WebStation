@@ -69,7 +69,7 @@ def output(expr, top=True, emitting=False):
 		return '0x%x' % expr
 	elif isinstance(expr, str) or isinstance(expr, unicode):
 		if emitting and expr.startswith('$') and not expr.startswith('$_'):
-			return '0x" + hexify(%s) + "' % expr
+			return '" + %s + "' % expr
 		else:
 			return expr
 

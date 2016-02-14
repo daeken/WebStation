@@ -42,37 +42,33 @@ class Cpu
 		if @last_block_pc == pc
 			return [true, pc, @last_block_func]
 
+		#phex32 'Decompile block:', pc
+
 		@last_block_pc = pc
-		total = ''
+		code = ''
 		emit = (snippet) -> code += snippet + '\n'
 		branched = false
 		branch = -> branched = true
 		while true
-			code = ''
 			inst = @mem.uint32 pc
 			if not decompile pc, inst, emit, branch
-				return [false, pc + 4]
+				return [false, pc]
 			pc += 4
 			if branched
-				tcode = code
-				code = ''
 				inst = @mem.uint32 pc
 				if not decompile pc, inst, emit, branch
-					return [false, pc + 4]
+					return [false, pc]
 				pc += 4
-				total += code
-				total += tcode
 				break
-			else
-				total += code
 
-		func = eval('(function(state) { state.delayed = false;\n' + total + ' })')
+		total = '(function(state) {\nstate.delayed = null;\nstate.branch_to = null;\n' + code + '\nif(state.branch_to != null) state.pc = state.branch_to;\n})'
+		func = eval(total)
 		@last_block_func = func
 		[true, pc, func]
 
 	branch: (pc, recompiled=false) ->
 		if recompiled
-			@pc = pc
+			@branch_to = pc
 		else
 			@debugger.branch @pc, pc if @debugger != null
 			@delay = @pc + 4
