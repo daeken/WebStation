@@ -9,7 +9,7 @@ SYNC_BLOCKS = 1 # Sync blocks to DMA requests   (used for MDEC, SPU, and GPU-dat
 SYNC_LL = 2 # Linked-List mode              (used for GPU-command-lists)
 
 class DMAChannel
-	constructor: (@cpu) ->
+	constructor: (@cpu, @channel) ->
 		@mem = @cpu.mem
 
 		@address = 0
@@ -27,7 +27,13 @@ class DMAChannel
 		@numblocks = 0
 
 	start: ->
-		console.log 'Starting DMA!'
+		console.log 'Starting DMA!', @channel
+		switch @syncmode
+			when SYNC_ALL
+				words = if @numwords == 0 then 0x10000 else @numwords
+				phex 'Writing', words, 'words', (if @direction == TO_MEM then 'to' else 'from'), @address
+			else
+				throw 'Unsupported DMA type ' + @syncmode + ' in channel ' + @channel
 
 class DMA
 	constructor: (@cpu) ->
@@ -35,13 +41,13 @@ class DMA
 		@_dpcr = 0x07654321
 		@_dicr = 0
 		@channels = [
-			new DMAChannel(@cpu), 
-			new DMAChannel(@cpu), 
-			new DMAChannel(@cpu), 
-			new DMAChannel(@cpu), 
-			new DMAChannel(@cpu), 
-			new DMAChannel(@cpu), 
-			new DMAChannel(@cpu)
+			new DMAChannel(@cpu, 0), 
+			new DMAChannel(@cpu, 1), 
+			new DMAChannel(@cpu, 2), 
+			new DMAChannel(@cpu, 3), 
+			new DMAChannel(@cpu, 4), 
+			new DMAChannel(@cpu, 5), 
+			new DMAChannel(@cpu, 6)
 		]
 
 	dpcr: (val=null) ->
