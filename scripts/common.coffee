@@ -94,3 +94,9 @@ ArithmeticOverflow = 12
 
 class Exception extends Error
 	constructor: (@message) ->
+
+Function::getter = (prop, get) ->
+	Object.defineProperty @prototype, prop, {get, configurable: yes}
+
+Function::setter = (prop, set) ->
+	Object.defineProperty @prototype, prop, {set, configurable: yes}

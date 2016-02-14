@@ -1,9 +1,11 @@
 DMA_OFF = 0
+DMA_FIFO = 1
 DMA_CPU2GPU = 2
 DMA_GPU2CPU = 3
 
 class GPU
 	constructor: (@cpu) ->
+		@renderer = new Renderer
 		@reset()
 
 	reset: ->
@@ -84,18 +86,19 @@ class GPU
 
 			when 0x08 # GP1(08h) - Display mode
 				@hres = 
-					if ((param >> 6) & 1) == 0
+					if !!((param >> 6) & 1)
+						368
+					else
 						switch param & 3
 							when 0 then 256
 							when 1 then 320
 							when 2 then 512
 							when 3 then 640
-					else
-						368
 				@vres = if ((param >> 2) & 1) == 0 then 240 else 480
 				@pal = !!((param >> 3) & 1)
-				@interlace = !!((param >> 4) & 1)
-				console.log 'Resolution:', @hres, @vres
+				@display_color_depth = if !!((param >> 4) & 1) then 15 else 14
+				@interlace = !!((param >> 5) & 1)
+				@renderer.mode = [@hres, @vres, @interlace]
 			else
 				phex 'Unknown GP1:', command, param
 				throw 'Unhandled GP1'
@@ -141,7 +144,12 @@ class GPU
 			(@interlace << 22) | 
 			(@display << 23) | 
 			(@irq << 24) | 
-			(0 << 25) | # XXX: Implement
+			((switch @dma_direction
+				when DMA_OFF then 0
+				when DMA_FIFO then 1
+				when DMA_CPU2GPU then 1
+				when DMA_GPU2CPU then 1
+			 ) << 25) |
 			(1 << 26) | 
 			(1 << 27) | 
 			(1 << 28) | 

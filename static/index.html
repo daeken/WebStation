@@ -9,6 +9,7 @@
 		<script src="debugger.coffee"></script>
 		<script src="cpu.coffee"></script>
 		<script src="dma.coffee"></script>
+		<script src="renderer.coffee"></script>
 		<script src="gpu.coffee"></script>
 		<script src="main.coffee"></script>
 		<link rel="stylesheet" type="text/css" href="style.css">
@@ -48,7 +49,8 @@
 			<pre id="memory">
 			</pre>
 			<button id="down">&darr;&darr;&darr;</button>&nbsp;
-			<button id="up">&uarr;&uarr;&uarr;</button>
+			<button id="up">&uarr;&uarr;&uarr;</button><br>
+			<canvas id="cvs" width="640" height="480"></canvas>
 		</div>
 		<div class="right-column">
 			<table class="registers">
